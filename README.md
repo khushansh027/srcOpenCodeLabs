@@ -2,7 +2,7 @@
 
 A modern, full-featured Learning Management System inspired by Udemy and Coursera, built with React, Firestore, and Supabase.
 
-![LMS Preview](src/icons/OpenCodeLabs.dev.mp4)
+![LMS Preview](src/icons/OpenCodeLabs.dev.gif)
 
 ## ✨ Features
 
@@ -191,5 +191,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For support, email khushansh.arora2@gmail.com or open an issue in the repository.
 
 ---
+
 
 Made with ❤️ using React
