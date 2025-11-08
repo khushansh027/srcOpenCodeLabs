@@ -1,0 +1,169 @@
+/* Base Layout */
+.about-page {
+    background-color: #0b0c10;
+    color: #f1f1f1;
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+    text-align: center;
+    padding: 6rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -30%;
+    width: 160%;
+    height: 180%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.hero-subtitle span {
+    font-weight: 600;
+    color: #fff;
+}
+
+/* About Content */
+.about-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+    display: grid;
+    gap: 2rem;
+}
+
+.about-card {
+    background-color: #11121a;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.about-card h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #7c3aed;
+}
+
+.about-card p {
+    color: #d1d5db;
+    line-height: 1.6;
+}
+
+/* Interactive Hover Effect */
+.about-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+}
+
+/* Fade-in Animation */
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeUp 0.8s ease forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.2s;
+}
+
+.delay-2 {
+    animation-delay: 0.4s;
+}
+
+.delay-3 {
+    animation-delay: 0.6s;
+}
+
+.delay-4 {
+    animation-delay: 0.8s;
+}
+
+/* CTA Section */
+.cta-section {
+    text-align: center;
+    background: #1a1b23;
+    padding: 4rem 2rem 6rem;
+}
+
+.cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #a78bfa;
+}
+
+.cta-section p {
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    color: #e5e7eb;
+}
+
+.cta-btn {
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
+    color: white;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .about-card {
+        padding: 1.5rem;
+    }
+}
