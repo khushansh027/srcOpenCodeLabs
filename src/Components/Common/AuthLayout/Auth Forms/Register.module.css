@@ -47,7 +47,7 @@
     background: #fbfcff;
     transition: box-shadow 160ms ease, border-color 160ms ease, transform 120ms ease;
     outline: none;
-    color: var(--text);
+    color:#2d11abe7;
 }
 
 .input::placeholder {
@@ -180,4 +180,5 @@
         transition: none;
         animation: none;
     }
+
 }
