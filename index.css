@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700&display=swap');
 /* ============================================
    GLOBAL RESPONSIVE FIXES
    ============================================ */
@@ -54,6 +54,10 @@ body {
   /* Prevent overflow */
   overflow-x: hidden;
   
+}
+
+h1, h2 {
+  font-family: 'Funnel Display', sans-serif;
 }
 
 /* ============================================
@@ -218,4 +222,5 @@ select {
   nav, footer, .no-print {
     display: none;
   }
+
 }
