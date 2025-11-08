@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #8b5cf6;
+    --secondary: #6366f1;
+    --bg-dark: #0a0a14;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.07);
+    --text-main: #f1f5ff;
+    --muted: #9ca3af;
+    --radius: 14px;
+}
+
+/* Root container */
+.dashboardRoot {
+    background: radial-gradient(ellipse at top, #141426 0%, #0a0a14 100%);
+    min-height: calc(100vh - 64px);
+    color: var(--text-main);
+    font-family: 'Funnel Display', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 2rem;
+    gap: 2.5rem;
+    overflow-x: hidden;
+}
+
+/* Header */
+.header {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(90deg, var(--primary), #a78bfa, var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Subtext */
+.subtext {
+    color: var(--muted);
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.subtext span {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Grid layout for stats */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 2rem;
+}
+
+/* Cards */
+.card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2.2rem 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 0 0 transparent;
+}
+
+.card h3 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+}
+
+.value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Neon glows */
+.purpleGlow:hover {
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.6);
+    transform: translateY(-6px);
+}
+
+.blueGlow:hover {
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.6);
+    transform: translateY(-6px);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.9rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.primaryBtn {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color: white;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+}
+
+.primaryBtn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+}
+
+.secondaryBtn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.secondaryBtn:hover {
+    background: rgba(139, 92, 246, 0.1);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 18px rgba(99, 102, 241, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .dashboardRoot {
+        padding: 3rem 1rem;
+    }
+
+    .card {
+        padding: 1.8rem 1.2rem;
+    }
+
+    .value {
+        font-size: 2.4rem;
+    }
+}

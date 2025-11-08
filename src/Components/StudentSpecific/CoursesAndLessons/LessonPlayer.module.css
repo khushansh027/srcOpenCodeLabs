@@ -1,0 +1,249 @@
+
+:root {
+    --primary: #615fff;
+    --primary-600: #4e48e6;
+    --accent: #7c3aed;
+    --bg: #07080a;
+    --surface: #0f1316;
+    --muted: #9aa4b2;
+    --text: #e6eef8;
+    --glass: rgba(255, 255, 255, 0.02);
+    --card-elev: rgba(97, 95, 255, 0.12);
+    --radius: 12px;
+}
+
+/* Page container */
+.page {
+    background: linear-gradient(45deg, #05060a 30%, #1e1e1e 80%);
+    color: var(--text);
+    padding: 28px 20px;
+    min-height: 80vh;
+    box-sizing: border-box;
+}
+
+/* overall content grid: player left, sidebar right */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+}
+
+/* PLAYER COLUMN */
+.playerColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* header */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    font-size: 1.625rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+}
+
+.meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+}
+
+.metaLeft {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--muted);
+}
+
+.instructor {
+    font-weight: 700;
+    color: var(--primary-600);
+}
+
+.duration {
+    color: var(--muted);
+}
+
+.bullet {
+    opacity: 0.6;
+}
+
+/* player wrap */
+.playerWrap {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.06));
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 12px 30px rgba(6, 8, 20, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+/* embed & native player */
+.embed {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.nativePlayer {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: black;
+}
+
+.video {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: black;
+}
+
+/* hint text row */
+.controlsRow {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+/* content area (lesson description) */
+.content {
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.prose {
+    color: #d6dbe4;
+    line-height: 1.7;
+    font-size: 1rem;
+    word-wrap: break-word;
+}
+
+.prose p {
+    margin: 0 0 0.9rem 0;
+}
+
+.prose a {
+    color: var(--primary);
+}
+
+/* SIDEBAR (right) */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: sticky;
+    top: 20px;
+    align-self: start;
+}
+
+/* small cards inside sidebar */
+.card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.04));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 8px 18px rgba(6, 8, 20, 0.5);
+}
+
+.cardHeader {
+    padding: 12px 14px;
+    font-weight: 700;
+    color: var(--primary-600);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.cardBody {
+    padding: 12px 14px;
+    color: var(--muted);
+}
+
+.courseTitle {
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.smallMeta {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* notes textarea */
+.notes {
+    width: 100%;
+    min-height: 90px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+    padding: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* small interactive touches */
+.playerWrap:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 56px var(--card-elev);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px rgba(97, 95, 255, 0.08);
+}
+
+/* Responsive: collapse to single column on small screens */
+@media (max-width: 920px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .sidebar {
+        position: static;
+        top: auto;
+    }
+
+    .playerWrap {
+        padding: 8px;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .playerWrap,
+    .card,
+    .container,
+    .page {
+        transition: none !important;
+    }
+}

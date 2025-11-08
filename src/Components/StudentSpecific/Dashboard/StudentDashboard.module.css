@@ -1,0 +1,255 @@
+.studentDashboardContainer {
+    background: #121212;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    min-height: calc(100vh - 80px);
+    text-align: center;
+}
+
+.studentDashboardContainer h1 {
+    font-size: 50px;
+    font-weight: 700;
+    color: ivory;
+    text-align: center;
+    margin-bottom: 70px;
+    margin-top: 30px;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    padding-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.studentDashboardContainer h1:hover,
+.studentDashboardContainer h1:focus-within {
+    transform: translateY(-6px);
+    color: #7d5afc;
+    border-color: rgba(143, 79, 215, 0.28);
+    z-index: 30;
+}
+
+/* Container for cards */
+.studentDashboardGrid {
+    display: flex;
+    gap: 6rem;
+    margin-top: 10px;
+    margin-bottom: 200px;
+}
+
+/* Base dashboard card */
+.profileCard {
+    width: 350px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: visible;
+    background-color: #0e0e0f;
+    margin: 20px auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform: translateY(30px);
+    will-change: transform, box-shadow;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Hover and keyboard focus produce the lifted / glowing card look */
+.profileCard:hover,
+.profileCard:focus-within {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(75, 44, 203, 0.18);
+    border-color: rgba(143, 79, 215, 0.28);
+    z-index: 30;
+}
+
+/* HEADER: keep some top padding but smaller than avatar radius */
+.cardHeader {
+    background-color: #000000;
+    padding: 56px 0 18px;
+    position: relative;
+    text-align: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    overflow: visible;
+}
+
+/* AVATAR: sits half-outside the header */
+.profileIcon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    background-color: #8850e9;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    box-shadow: 0 8px 20px rgba(6, 8, 20, 0.18);
+    display: inline-block;
+    transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+/* ENHANCED GLOW ON HOVER */
+.profileCard:hover .profileIcon,
+.profileCard:focus-within .profileIcon {
+    transform: translate(-50%, -58%);
+    box-shadow:
+        0 8px 30px rgba(6, 8, 20, 0.25),
+        0 0 25px rgba(124, 58, 237, 0.8),
+        0 0 50px rgba(124, 58, 237, 0.4);
+}
+
+/* CONTENT: padding to not collide with avatar */
+.cardContent {
+    padding: 15px 10px 18px 10px;
+    text-align: left;
+}
+
+.cardContent h2 {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+    text-align: center;
+    transition: color 220ms ease, transform 220ms ease;
+}
+
+/* Subtle underline on hover */
+.cardContent h2:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Adjust text and link styling */
+.cardContent p {
+    margin: 8px 0px 0px 10px;
+}
+
+.cardContent a {
+    display: block;
+    text-align: right;
+    margin-top: 20px;
+    margin-right: 15px;
+    color: #885ed0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 20px;
+    transition: color 180ms ease, transform 180ms ease;
+}
+
+.cardContent a:hover,
+.cardContent a:focus {
+    color: #caabff;
+    transform: translateY(-2px);
+}
+
+/* Course count & link */
+.courseCount {
+    display: block;
+    text-align: center;
+    margin: 0px;
+    color: #885ed0;
+    font-weight: bold;
+    font-size: 40px;
+    transition: transform 220ms ease, color 220ms ease;
+}
+
+.courseLink {
+    display: block;
+    text-align: right;
+    color: #885ed0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* Make the count and title pop a bit on hover */
+.profileCard:hover .courseCount,
+.profileCard:focus-within .courseCount,
+.profileCard:hover .courseLink {
+    transform: translateY(-4px);
+    color: #caabff;
+}
+
+.profileCard:hover .cardContent h2,
+.profileCard:focus-within .cardContent h2 {
+    color: #caabff;
+}
+
+/* =====================================================
+   RESPONSIVE: FIXED MOBILE OVERLAP ISSUE
+   ===================================================== */
+
+@media (max-width: 880px) {
+    .studentDashboardGrid {
+        flex-direction: column;
+        gap: 120px; /* ✅ INCREASED: Extra space between stacked cards to prevent icon overlap */
+        margin-top: 80px; /* ✅ INCREASED: Space at top for first card's icon */
+        margin-bottom: 80px;
+    }
+
+    .profileCard {
+        width: calc(100% - 48px);
+        margin: 0 auto;
+    }
+
+    .studentDashboardContainer h1 {
+        margin-bottom: 40px;
+        font-size: 34px;
+    }
+    
+    .studentDashboardContainer {
+        padding: 2rem 1rem; /* ✅ Reduced side padding on mobile */
+    }
+}
+
+/* Mobile tweaks for avatar */
+@media (max-width: 480px) {
+    .profileIcon {
+        width: 100px; /* ✅ Slightly smaller icon on small screens */
+        height: 100px;
+        transform: translate(-50%, -50%);
+    }
+
+    .cardHeader {
+        padding: 48px 0 16px; /* ✅ Adjusted padding for smaller icon */
+    }
+    
+    .studentDashboardGrid {
+        gap: 100px; /* ✅ Adjusted gap for smaller icon */
+        margin-top: 70px;
+    }
+    
+    .studentDashboardContainer h1 {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .profileIcon {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .cardHeader {
+        padding: 44px 0 14px;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .profileCard,
+    .profileIcon,
+    .cardContent h2,
+    .courseCount {
+        transition: none !important;
+        transform: none !important;
+    }
+}

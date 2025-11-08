@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+      --font-family: "Funnel Display";
+}
+.nav-bg {
+      letter-spacing: 0.07rem;
+      background-color: #2a2b3f;
+}

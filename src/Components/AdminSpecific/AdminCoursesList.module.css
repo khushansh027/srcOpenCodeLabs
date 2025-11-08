@@ -1,0 +1,13 @@
+.main-content {
+  min-height: calc(100vh - 72px); 
+  color: white;
+  padding: 80px 20px 0px 20px;
+  align-items: center;
+
+}
+
+.radial-bg {
+  background: radial-gradient(ellipse at top, #0b0620 0%, #05030b 60%);
+}
+
+/*error in prive and buttons formatting*/

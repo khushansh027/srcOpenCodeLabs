@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&display=swap');
+
+:root{
+  --accent: #7c3aed;
+  --card-bg: #1d1d1d;       /* deep card background */
+  --card-bg-2: #28292b;     /* slightly darker */
+  --muted: #a8b0bf;
+  --text: #e6ecf8;
+  --glass: rgba(255,255,255,0.03);
+  --shadow-strong: rgba(97,95,255,0.18);
+  --shadow-soft: rgba(6,8,20,0.6);
+  --radius: 12px;
+  --font-family: "Funnel Display";
+}
+
+.group.text-4xl.font-bold.mb-8.text-amber-50{
+  font-family: var(--font-family);
+  font-weight: 700;
+}
+/* Target the specific card combination used in JSX */
+.group.bg-white.flex.flex-col {
+  /* dark glass card */
+  background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg-2) 100%);
+  color: var(--text);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 24px var(--shadow-soft);
+  overflow: hidden;
+  transition: transform 320ms cubic-bezier(.2,.9,.3,1), box-shadow 320ms ease, border-color 320ms ease;
+  will-change: transform, box-shadow;
+  display: flex;           /* keeps flex-col behavior */
+  flex-direction: column;
+  min-height: 100%;        /* stable height */
+}
+
+/* Hover / focus lift and glow (same vibe as about-card) */
+.group.bg-white.flex.flex-col:hover,
+.group.bg-white.flex.flex-col:focus-within {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 56px var(--shadow-strong);
+  border-color: rgba(97,95,255,0.22);
+  z-index: 10;
+}
+
+/* Thumbnail area - keep height but dark overlay and nicer crop */
+.group.bg-white.flex.flex-col .relative.h-48 {
+  height: 13rem; /* slightly taller for cinematic look */
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18));
+  overflow: hidden;
+}
+
+/* Make image scale look smoother and keep transform origin center */
+.group.bg-white.flex.flex-col img.object-cover {
+  transition: transform 420ms cubic-bezier(.2,.9,.3,1), filter 320ms ease;
+  transform-origin: center;
+  display: block;
+}
+
+/* Image scale on card hover */
+.group.bg-white.flex.flex-col:hover img.object-cover,
+.group.bg-white.flex.flex-col:focus-within img.object-cover {
+  transform: scale(1.08);
+  filter: saturate(1.05) contrast(1.02);
+}
+
+/* Enrolled badge — keep contrast on dark bg */
+.group.bg-white.flex.flex-col .absolute.top-2.right-2 {
+  /* same structure as your badge element; increase specificity */
+}
+.group.bg-white.flex.flex-col .absolute.top-2.right-2.bg-green-500 {
+  background: linear-gradient(180deg, #16a34a, #059669);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(5,150,105,0.12);
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+/* Content block */
+.group.bg-white.flex.flex-col a.block.p-4 {
+  background-color: rgb(21. 21, 21);
+  color: var(--text);
+  padding: 1.1rem;
+  display: block;
+  flex-grow: 1;
+}
+
+/* Title */
+.group.bg-white.flex.flex-col a.block.p-4 h3 {
+  color: #e6ecf8; /* default title color */
+  font-size: 1.05rem;
+  line-height: 1.25;
+  margin-bottom: 0.45rem;
+  transition: color 220ms ease, transform 220ms ease;
+}
+
+/* Title color change on hover of card */
+.group.bg-white.flex.flex-col:hover a.block.p-4 h3,
+.group.bg-white.flex.flex-col:focus-within a.block.p-4 h3 {
+  color: #615fff;
+  transform: translateY(-3px);
+}
+
+/* Description */
+.group.bg-white.flex.flex-col a.block.p-4 p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* Footer row inside content (price + instructor) */
+.group.bg-white.flex.flex-col a.block.p-4 .flex.justify-between.items-center.pt-3 {
+  border-top: 1px solid rgba(255,255,255,0.03);
+  padding-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Price accent */
+.group.bg-white.flex.flex-col a.block.p-4 .text-xl.font-bold.text-indigo-500,
+.group.bg-white.flex.flex-col a.block.p-4 .text-xl.font-bold.text-indigo-500 {
+  color: #615fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+/* Instructor text */
+.group.bg-white.flex.flex-col a.block.p-4 .flex.items-center.text-sm {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Lessons count */
+.group.bg-white.flex.flex-col a.block.p-4 .mt-2.text-xs {
+  color: rgba(255,255,255,0.32);
+  font-size: 0.85rem;
+}
+
+/* Enrollment / CTA area (bottom area with button) */
+.group.bg-white.flex.flex-col > .p-4 {
+  background-color: rgb(21, 21, 21);
+  padding-top: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+/* Buttons — unified style */
+.group.bg-white.flex.flex-col button,
+.group.bg-white.flex.flex-col a.block.w-full,
+.group.bg-white.flex.flex-col a.block.w-full.bg-green-600 {
+  display: inline-block;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 160ms ease;
+  border: none;
+}
+
+/* Primary enroll button */
+.group.bg-white.flex.flex-col button.bg-indigo-500,
+.group.bg-white.flex.flex-col .bg-indigo-500 {
+  background: linear-gradient(135deg, #615fff, #4e48e6);
+  color: white;
+  box-shadow: 0 8px 22px rgba(97,95,255,0.14);
+}
+
+/* Hover states for buttons */
+.group.bg-white.flex.flex-col button.bg-indigo-600:hover,
+.group.bg-white.flex.flex-col .bg-indigo-600:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(97,95,255,0.18);
+}
+
+/* Admin/manage and other buttons: tuned colors */
+.group.bg-white.flex.flex-col .bg-gray-600 { background: linear-gradient(180deg,#4b5563,#374151); color: #fff; }
+.group.bg-white.flex.flex-col .bg-gray-400 { background: linear-gradient(180deg,#9ca3af,#6b7280); color:#fff; }
+
+/* Make text links inside the card a bit brighter on hover */
+.group.bg-white.flex.flex-col:hover .courseLink,
+.group.bg-white.flex.flex-col:hover .cardContent a,
+.group.bg-white.flex.flex-col:hover .courseLink {
+  color: #fff9d6;
+}
+
+/* Card spacing and grid adjustments (keeps existing responsive layout) */
+.grid > .group.bg-white.flex.flex-col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Prevent overflow & ensure nice rounded corners on images */
+.group.bg-white.flex.flex-col .relative.h-48 img {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Fade-in entrance (optional, subtle) */
+@keyframes cardFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.group.bg-white.flex.flex-col { animation: cardFadeUp 0.6s ease both; }
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .group.bg-white.flex.flex-col,
+  .group.bg-white.flex.flex-col img,
+  .group.bg-white.flex.flex-col button {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Responsive tweak: slightly narrower thumbnail on small screens */
+@media (max-width: 640px) {
+  .group.bg-white.flex.flex-col .relative.h-48 { height: 11.5rem; }
+}

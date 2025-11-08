@@ -1,0 +1,268 @@
+/* Footer.module.css — Violet primary + Ivory secondary */
+:root {
+  /* Brand colours */
+  --primary: #615fff;        /* violet (matches navbar) */
+  --primary-600: #4e48e6;    /* darker violet stop */
+  --ivory: #fffff0;          /* ivory app background (secondary) */
+  --ivory-100: #fffdf2;      /* slightly warmer ivory for subtle gradient */
+  --card-bg: #fffff0;
+  --muted: #6f7480;
+  --text: #fffff0;
+  --soft: #fffff0;
+  --primary-rgb: 97,95,255;  /* rgb used for rgba() helpers */
+  --radius: 10px;
+}
+
+/* Base */
+.footer {
+  background: #2a2b3f;
+  color: var(--text);
+  padding: 22px 14px 12px;
+  border-top: 5px outset rgba(189, 184, 202, 0.04);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  margin-bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Container: reduce vertical footprint */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 0 10px;
+}
+
+/* Brand block smaller */
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* small colored logo container - use primary */
+.logoWrap {
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(var(--primary-rgb), 0.06);
+}
+
+/* Allow children inside grid/flex to shrink (prevents overflow) */
+.container,
+.linksGrid,
+.brand,
+.newsForm,
+.bottomInner {
+  min-width: 0; /* critical for flex/grid children to be able to shrink on overflow */
+}
+
+/* Brand text */
+.brandText { line-height: 1; }
+.title {
+  font-size: 16px;
+  color: #fffff0;
+  display: block;
+}
+.tag {
+  margin: 3px 0 0 0;
+  font-size: 12px;
+  color: #ccccc8;
+}
+
+.title:hover, .title:focus {
+  transform: translateY(-4px);
+  transition: ease-in-out;
+}
+/* Links grid: tighter layout */
+.linksGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+/* Column titles and links */
+.colTitle {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fffff0;
+}
+
+.linkList a {
+  font-size: 13px;
+  text-decoration: none;
+  color: #ccccc8;
+  transition: color 120ms ease, transform 120ms ease;
+}
+
+.linkList a:hover,
+.linkList a:focus {
+  color: var(--primary-600);
+  transform: translateX(4px);
+}
+
+/* Newsletter area smaller */
+.small {
+  font-size: 12px;
+  color: #ccccc8;
+  margin-bottom: 8px;
+}
+
+.newsForm {
+  display: flex;
+  flex-direction:column;
+  width: auto;
+  gap: 10px;
+}
+
+.input {
+  flex: 1 1 auto;    /* grow and shrink */
+  max-width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(15, 23, 36, 0.08);
+  background: var(--card-bg);
+  font-size: 13px;
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(176, 175, 181, 0.589);
+}
+
+/* Primary (subscribe) button uses primary violet */
+.ghostBtn {
+  width: 70%;
+  padding: 8px 2px 8px 2px;
+  border-radius: 9px;
+  border: none;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-600) 100%);
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.10);
+}
+
+.ghostBtn:hover,
+.ghostBtn:focus {
+  transform: translateY(-2px);
+}
+
+/* Social icons smaller and tighter */
+.social {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* icon background uses faint violet tint */
+.iconLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.05);
+  color: var(--primary-600);
+  text-decoration: none;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.iconLink:hover,
+.iconLink:focus {
+  background: rgba(var(--primary-rgb), 0.12);
+  transform: translateY(-2px);
+  background-color: #fffdf2;
+}
+
+/* bottom bar - reduce space */
+.bottom {
+  margin-top: 12px;
+  padding: 10px 8px;
+  border-top: 1px solid rgba(15, 23, 36, 0.04);
+  background: transparent;
+}
+
+.bottomInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.copy {
+  color: #ccccc8;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* policy links: subtle, hover uses primary violet */
+.policyLinks a {
+  margin-left: 8px;
+  text-decoration: none;
+  color: #ccccc8;
+  font-size: 13px;
+}
+
+.policyLinks a:hover {
+  color: var(--primary-600);
+}
+
+.dot {
+  margin: 0 8px;
+  color: var(--muted);
+}
+
+/* visually hidden helper */
+.visuallyHidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+/* responsive adjustments */
+@media (max-width: 920px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .linksGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .bottomInner {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .linksGrid {
+    grid-template-columns: 1fr;
+  }
+  .logoWrap {
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .container {
+    padding: 0 8px;
+  }
+}

@@ -1,0 +1,185 @@
+:root {
+    --primary: #615fff;
+    --primary-600: #4e48e6;
+    --accent: #7c3aed;
+    --ivory: #fffff0;
+    --bg-dark: #0b0f14;
+    /* page background */
+    --card-dark: #0f1318;
+    /* card surface */
+    --card-elev: rgba(97, 95, 255, 0.12);
+    --muted: #9aa4b2;
+    --text: #895eff;
+    --radius-lg: 14px;
+    --glass: rgba(255, 255, 255, 0.02);
+}
+
+/* Page root: slightly lighter background gradient like About page */
+.course-page {
+    background: linear-gradient(180deg, rgb(11, 11, 11) 0%, rgb(15, 16, 20) 100%);
+    color: var(--text);
+    padding-bottom: 64px;
+    box-sizing: border-box;
+}
+
+/* Back button area: keep visible on dark background */
+.course-page .ml-4 {
+    margin-left: 1rem;
+}
+
+/* Course card: large soft glass card */
+.course-card {
+    background: linear-gradient(90deg, rgba(8, 8, 8, 0.682), rgb(34, 34, 34), rgba(8, 8, 8, 0.682));
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 10px 30px rgba(6, 8, 20, 0.6);
+    padding: 1.25rem;
+    margin: 2.25rem 1rem;
+    overflow: visible;
+    transition: transform 320ms cubic-bezier(.2, .9, .3, 1), box-shadow 320ms ease;
+}
+
+/* Slight lift on hover/focus of the entire card */
+.course-card:hover,
+.course-card:focus-within {
+    transform: translateY(-6px);
+    box-shadow: 0px 50px 100px var(--card-elev);
+    border-color: rgba(97, 95, 255, 0.18);
+    z-index: 20;
+}
+
+/* Title area */
+.course-card .text-3xl {
+    color: var(--ivory);
+    font-weight: 800;
+    text-align: center;
+    margin-right: 0.75rem;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+}
+
+/* Thumbnail treatment */
+.course-card img {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+    max-height: 420px;
+}
+
+/* Description header */
+.course-card h2 {
+    color: var(--accent);
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+/* Description body: preserve whitespace (you already have pre-wrap),
+   and tune typography for dark theme */
+.course-card p {
+    color: #d6dbe4;
+    line-height: 1.6;
+    font-size: 1.05rem;
+    margin-top: 0.5rem;
+}
+
+/* Price & instructor row */
+.course-card .flex.items-center {
+    gap: 1rem;
+}
+
+.course-card .text-2xl {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+/* instructor label */
+.course-card .text-indigo-600,
+.course-card .font-mono {
+    color: #f3f0ff;
+    font-weight: 700;
+}
+
+/* Lessons container */
+.course-page .max-w-2xl {
+    max-width: 960px;
+    /* give more width for lessons area */
+    margin-top: 1.25rem;
+}
+
+/* Lesson list title */
+.course-page h3.text-2xl {
+    color: #ffffff;
+    font-size: 1.6rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Lesson item: glassy card and subtle border */
+.course-page .space-y-2>a.block {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 12px;
+    transition: transform 260ms cubic-bezier(.2, .9, .3, 1), box-shadow 260ms ease, background 220ms ease;
+    display: block;
+    text-decoration: none;
+    color: var(--text);
+}
+
+/* lift on hover and focus */
+.course-page .space-y-2>a.block:hover,
+.course-page .space-y-2>a.block:focus-within {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 46px rgba(97, 95, 255, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(4, 6, 10, 0.12));
+    border-color: rgba(97, 95, 255, 0.12);
+}
+
+/* lesson title */
+.course-page .space-y-2 .font-medium {
+    color: #e9eefc;
+    font-weight: 700;
+    transition: color 160ms ease, transform 160ms ease;
+}
+
+/* small meta text */
+.course-page .text-gray-500,
+.course-page .text-gray-400 {
+    color: var(--muted);
+}
+
+/* Completed badge */
+.course-page .text-green-600 {
+    color: #34d399;
+    font-weight: 700;
+}
+
+/* duration text */
+.course-page .text-sm.text-gray-500 {
+    color: #9aa4b2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 880px) {
+    .course-card {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .course-page .max-w-2xl {
+        max-width: 95%;
+        padding: 0 1rem;
+    }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .course-card,
+    .course-page .space-y-2>a.block {
+        transition: none !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}

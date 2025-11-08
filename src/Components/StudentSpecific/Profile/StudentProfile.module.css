@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #615fff;
+    /* violet */
+    --primary-600: #4e48e6;
+    --bg-dark: #101217;
+    /* deep page background */
+    --card-dark: #0f1318;
+    /* card surface */
+    --card-2: #0b0f14;
+    --muted: #9aa4b2;
+    --text: #e6eef8;
+    --accent: #7c3aed;
+    --radius: 14px;
+    --gap: 1rem;
+    --shadow-soft: 0 8px 5px rgba(6, 8, 20, 0.01);
+    --violet-glow: rgba(97, 95, 255, 0.01);
+    --font-family: "Funnel Display";
+}
+
+.backWrap {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: 0px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: var(--font-family);
+    transition: color 160ms ease;
+}
+
+.backWrap:hover {
+    color: oklch(67.3% 0.182 276.935);
+}
+
+/* Page container (keep a dark page bg only inside the component) */
+.container {
+    max-width: 1100px;
+    margin: 10px auto 0px auto;
+    padding: 28px;
+    padding-top: 0px;
+    padding-bottom: 50px;
+    box-sizing: border-box;
+    background: transparent;
+    /* page background still handled globally */
+    color: #e6eef8;
+    font-family: var(--font-family);
+}
+
+
+/* Title should be clearly visible on dark background */
+.title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    color: oklch(65.108% 0.24656 7.465);
+    text-align: center;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-family: "Funnel Display";
+    font-weight: bolder;
+    letter-spacing: 0.3rem;
+}
+
+/* Strong, opaque glass card (no white/translucent tint) */
+.profileWrapper {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+    align-items: start;
+    /* Solid dark card surface (no translucent white) */
+    background: linear-gradient(180deg, #0f1318 0%, #0b0f14 100%);
+    padding: 26px;
+    border-radius: 16px;
+    box-shadow:
+        /* right glow */
+        10px 20px 30px 5px oklch(65.323% 0.21578 298.557 / 0.18),
+        /* left glow (mirror) */
+        -10px 20px 30px 5px oklch(77.025% 0.1189 278.996 / 0.18),
+        /* subtle base soft shadow — slightly dimmer and closer to the card */
+        10px 10px 25px 3px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(97, 95, 255, 0.06);
+    /* subtle violet border */
+    transition: transform 320ms cubic-bezier(.2, .9, .3, 1), box-shadow 320ms ease;
+    will-change: transform, box-shadow;
+}
+
+/* Hover/focus lift */
+.profileWrapper:hover,
+.profileWrapper:focus-within {
+    transform: translateY(5px);
+    /* Adjust the box-shadow for a less intense glow */
+    box-shadow: 0 1px 0 1px rgba(97, 95, 255, 0.01);
+    /* Decrease the opacity of the border color */
+    border-color: rgba(97, 95, 255, 0.01);
+}
+
+/* Left column - avatar */
+.imageSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 4px;
+}
+
+/* Avatar container: keep it bright but framed so it pops on dark card */
+.profileImg {
+    width: 260px;
+    height: 260px;
+    border-radius: 14px;
+    background: oklch(80.649% 0.09912 280.135);
+    /* light card for avatar */
+    padding: 12px;
+    box-shadow: 0 16px 40px rgba(6, 8, 20, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+/* If profile image is an <img>, ensure contained and crisp */
+.profileImg img,
+.profileImg svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+/* Small tagline */
+.meta {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* Right column: form (keep monospace option but use readable system font) */
+.formSection {
+    min-width: 0;
+    /* prevents overflow inside grid */
+    font-family: var(--font-family);
+}
+
+/* Form layout */
+.form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 6px;
+}
+
+/* form group layout & label */
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formGroup>label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e6eef8;
+}
+
+
+/* Inputs: subtle dark inputs to match dark card (not white) */
+.input,
+.textarea,
+.inputReadonly {
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.98rem;
+    color: #e9eefc;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
+    transition: box-shadow 140ms ease, transform 120ms ease, border-color 120ms ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Readonly slightly muted but dark */
+.inputReadonly {
+    background-color: rgba(255, 255, 255, 0.01);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Textarea preserve whitespace */
+.textarea {
+    min-height: 140px;
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+/* Focus states must be visible on dark background */
+.input:focus,
+.textarea:focus,
+.inputReadonly:focus {
+    outline: none;
+    border-color: #4e48e6;
+    box-shadow: 0 12px 36px rgba(97, 95, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+/* Buttons row */
+.buttonRow {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+/* Primary button styles */
+.button {
+    background: oklch(67.3% 0.182 276.935);
+    color: #202428;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: transform 180ms ease, box-shadow 180ms ease, opacity 120ms ease, background 160ms ease;
+}
+
+/* Disabled button: darker look */
+.buttonDisabled {
+    background: #1f2224;
+    color: #7b8086;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Disabled */
+.buttonDisabled {
+    background: #202428;
+    color: #dfdfdf;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Secondary button */
+.buttonSecondary {
+    background: transparent;
+    color: oklch(65.108% 0.24656 7.465);
+    border: 1px solid rgba(97, 95, 255, 0.08);
+}
+
+/* Micro-interactions */
+.button:hover:not(.buttonDisabled) {
+    transform: translateY(-3px);
+}
+
+.buttonSecondary:hover {
+    transform: translateX(8px);
+    background: rgba(97, 95, 255, 0.03);
+}
+
+/* Joined timestamp */
+.joined {
+    margin-top: 12px;
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+/* Responsiveness */
+@media (max-width: 880px) {
+    .profileWrapper {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .profileImg {
+        width: 180px;
+        height: 180px;
+        border-radius: 12px;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+}
+
+/* keyboard focus visuals */
+.input:focus-visible,
+.textarea:focus-visible,
+.button:focus-visible {
+    outline: 3px solid rgba(97, 95, 255, 0.12);
+    outline-offset: 2px;
+}
+
+
+/* reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+    .profileWrapper,
+    .profileImg,
+    .button {
+        transition: none !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* small polish: labels and helper text */
+.formGroup .helper {
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+/* ensure long values don't overflow */
+.input,
+.textarea,
+.inputReadonly {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
