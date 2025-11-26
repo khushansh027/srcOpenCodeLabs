@@ -88,16 +88,21 @@ const Signup = async (name, email, password) => {
         return userDoc;
     } catch (error) {
         console.error("Sign Up Error:", error);
-
-        // Provide user-friendly error messages
+        
         let errorMessage = "Signup failed. Please try again.";
 
         if (error.code === "auth/email-already-in-use") {
-            errorMessage = "This email is already registered.";
+            errorMessage = "This email is already registered. Please login instead.";
         } else if (error.code === "auth/weak-password") {
             errorMessage = "Password should be at least 6 characters.";
         } else if (error.code === "auth/invalid-email") {
             errorMessage = "Please enter a valid email address.";
+        } else if (error.code === "auth/operation-not-allowed") {
+            errorMessage = "Email/password accounts are not enabled. Please contact support.";
+        } else if (error.code === "auth/too-many-requests") {
+            errorMessage = "Too many signup attempts. Please try again later.";
+        } else if (error.code === "auth/network-request-failed") {
+            errorMessage = "Network error. Please check your connection and try again.";
         }
 
         throw new Error(errorMessage);
@@ -130,7 +135,24 @@ const Login = async (email, password) => {
         };
     } catch (error) {
         console.error("Sign In Error:", error);
-        throw new Error(error?.message || "Login failed");
+        
+        let errorMessage = "Login failed. Please try again.";
+
+        if (error.code === "auth/invalid-credential") {
+            errorMessage = "Invalid email or password. Please try again.";
+        } else if (error.code === "auth/user-not-found") {
+            errorMessage = "No account found with this email.";
+        } else if (error.code === "auth/wrong-password") {
+            errorMessage = "Incorrect password. Please try again.";
+        } else if (error.code === "auth/invalid-email") {
+            errorMessage = "Please enter a valid email address.";
+        } else if (error.code === "auth/too-many-requests") {
+            errorMessage = "Too many failed attempts. Please try again later.";
+        } else if (error.code === "auth/user-disabled") {
+            errorMessage = "This account has been disabled.";
+        }
+
+        throw new Error(errorMessage);
     }
 };
 
