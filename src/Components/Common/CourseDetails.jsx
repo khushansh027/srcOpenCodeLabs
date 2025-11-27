@@ -169,7 +169,6 @@ function CourseDetails() {
                                             key={lesson.id}
                                             to={`/courses/${courseId}/lessons/${lesson.id}`}
                                             state={{ lesson }}
-                                            target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={(e) => handleLessonClick(e, lesson)}
                                             className={`block p-4 border rounded-lg transition group ${
@@ -261,5 +260,6 @@ Why I’m confident:
 ✅ Loading/error boundaries keep UI resilient.
 
 ✅ The code now matches your schema, slice, and selector design — no mismatches.
+
 
 */
