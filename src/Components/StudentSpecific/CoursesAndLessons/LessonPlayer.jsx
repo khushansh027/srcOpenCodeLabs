@@ -20,7 +20,7 @@ function LessonPlayer() {
     const storeLesson = useSelector((s) => selectLessonById(s, courseId, lessonId));
     const course = useSelector((s) => selectCourseById(s, courseId));
     const toast = useToast();
-    
+
     // get logged-in user
     const user = useSelector(userSelector);
     const userId = user?.uid;
@@ -34,9 +34,18 @@ function LessonPlayer() {
     const lesson = locationLesson || storeLesson;
     const youtubeEmbed = convertYouTubeToEmbed(lesson?.videoUrl);
 
+    // notes state
+    const [notes, setNotes] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+    const [lastSaved, setLastSaved] = useState(null);
+    const notesTimeoutRef = useRef(null);
+
+    // Generate unique key for this lesson's notes
+    const notesKey = `lesson-notes-${courseId}-${lessonId}`;
+    
     // ref to track if we've shown the admin toast
     const adminToastShownRef = useRef(false);
-    
+
     // Debug logs    
     useEffect(() => {
         console.log('=== LessonPlayer State ===');
@@ -62,7 +71,7 @@ function LessonPlayer() {
             console.log('📥 Dispatching fetchEnrollmentForCourse');
             console.log('   - courseId:', courseId);
             console.log('   - userId:', userId);
-            
+
             dispatch(fetchEnrollmentForCourse({ userId, courseId }));
         } else {
             console.log('⏭️ Skipping enrollment fetch:');
@@ -89,10 +98,10 @@ function LessonPlayer() {
         didDispatchRef.current = false;
         // Also reset duration fetch for new lessons
         durationFetchRef.current = false;
-    }, 
+    },
         // [lessonId, enrollment?.id, completedKey]
         [lessonId, enrollment?.id]
-    ); 
+    );
 
     useEffect(() => {
         let mounted = true;
@@ -133,7 +142,7 @@ function LessonPlayer() {
                 console.log('enrollment?.id:', enrollment?.id);
                 console.log('lessonId:', lessonId);
                 console.log('completedSet.has(lessonId):', completedSet.has(lessonId));
-                
+
                 if (didDispatchRef.current) {
                     console.log('⏭️ Already dispatched, skipping');
                     return;
@@ -150,13 +159,13 @@ function LessonPlayer() {
                     console.log('⚠️ Duration is 0 or invalid, skipping');
                     return;
                 }
-                
+
                 const percent = (v.currentTime / duration) * 100;
                 console.log('Progress:', percent.toFixed(2) + '%');
 
                 if (percent >= 80 && !completedSet.has(lessonId)) {
                     console.log('✅ 80% reached! Marking as complete...');
-                    
+
                     if (enrollment?.id) {
                         console.log('📤 Dispatching markLessonCompletedByEnrollment');
                         dispatch(
@@ -173,10 +182,10 @@ function LessonPlayer() {
                             toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
                             adminToastShownRef.current = true;
                             console.log('ℹ️ No enrollment found (admin preview mode)');
-                        }else{
+                        } else {
                             console.warn('⚠️ Cannot mark complete: no enrollment');
                             console.log('enrollment object:', enrollment);
-                        }                        
+                        }
                     }
                 } else if (percent >= 80) {
                     console.log('ℹ️ Already in completedSet, skipping dispatch');
@@ -214,17 +223,17 @@ function LessonPlayer() {
                         return new Promise((resolve, reject) => {
                             let attempts = 0;
                             const maxAttempts = 20; // 20 attempts = 2 seconds max wait
-                            
+
                             const checkIframe = () => {
                                 attempts++;
                                 const iframe = document.getElementById(iframeId);
-                                
+
                                 if (iframe) {
                                     console.log('✅ Found iframe after', attempts, 'attempts');
                                     resolve(iframe);
                                 } else if (attempts >= maxAttempts) {
                                     console.error('❌ Iframe not found after', maxAttempts, 'attempts');
-                                    
+
                                     // Debug info
                                     const allIframes = document.querySelectorAll('iframe');
                                     console.log('All iframes on page:', allIframes.length);
@@ -234,14 +243,14 @@ function LessonPlayer() {
                                             class: iframe.className,
                                         });
                                     });
-                                    
+
                                     reject(new Error('Iframe not found'));
                                 } else {
                                     // Try again in 100ms
                                     setTimeout(checkIframe, 100);
                                 }
                             };
-                            
+
                             checkIframe();
                         });
                     };
@@ -257,7 +266,7 @@ function LessonPlayer() {
                             events: {
                                 onReady: (event) => {
                                     console.log('✅ YouTube player ready');
-                                    
+
                                     intervalId = setInterval(() => {
                                         if (!playerInstance || didDispatchRef.current || !mounted) {
                                             return;
@@ -266,15 +275,15 @@ function LessonPlayer() {
                                         try {
                                             const duration = playerInstance.getDuration();
                                             const currentTime = playerInstance.getCurrentTime();
-                                            
+
                                             if (duration > 0 && currentTime > 0) {
                                                 const percent = (currentTime / duration) * 100;
-                                                
+
                                                 // Log every 10 seconds
                                                 if (Math.floor(currentTime) % 10 === 0) {
                                                     console.log('📊', currentTime.toFixed(0), '/', duration.toFixed(0), 's -', percent.toFixed(1) + '%');
                                                 }
-                                                
+
                                                 if (percent >= 80 && !completedSet.has(lessonId)) {
                                                     if (enrollment?.id) {
                                                         console.log('🎉 80% REACHED! Marking complete...');
@@ -285,7 +294,7 @@ function LessonPlayer() {
                                                             })
                                                         );
                                                         didDispatchRef.current = true;
-                                                        
+
                                                         // Clear interval after marking complete
                                                         if (intervalId) {
                                                             clearInterval(intervalId);
@@ -297,7 +306,7 @@ function LessonPlayer() {
                                                             toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
                                                             adminToastShownRef.current = true;
                                                             console.log('ℹ️ No enrollment found (admin preview mode)');
-                                                        }else{
+                                                        } else {
                                                             console.warn('⚠️ Cannot mark complete: no enrollment');
                                                             console.log('enrollment object:', enrollment);
                                                         }
@@ -368,6 +377,83 @@ function LessonPlayer() {
         typeof lesson.duration === "number" && lesson.duration > 0 ? `${lesson.duration} min` : null;
     const isCompleted = completedSet.has(lessonId);
 
+    // Load notes from localStorage on mount or lesson change
+    useEffect(() => {
+        try {
+            const savedNotes = localStorage.getItem(notesKey);
+            if (savedNotes) {
+                setNotes(savedNotes);
+                console.log('📝 Loaded notes from localStorage');
+            } else {
+                setNotes("");
+            }
+        } catch (error) {
+            console.error("Error loading notes:", error);
+            setNotes("");
+        }
+    }, [notesKey]);
+
+    // Save notes to localStorage
+    const saveNotes = (noteText) => {
+        try {
+            localStorage.setItem(notesKey, noteText);
+            setLastSaved(new Date());
+            setIsSaving(false);
+            console.log('✅ Notes saved to localStorage');
+        } catch (error) {
+            console.error("Error saving notes:", error);
+            toast.error("Failed to save notes");
+            setIsSaving(false);
+        }
+    };
+
+    // Handle notes change with auto-save debounce
+    const handleNotesChange = (e) => {
+        const newNotes = e.target.value;
+        setNotes(newNotes);
+        setIsSaving(true);
+
+        // Clear previous timeout
+        if (notesTimeoutRef.current) {
+            clearTimeout(notesTimeoutRef.current);
+        }
+
+        // Auto-save after 1.5 seconds of no typing
+        notesTimeoutRef.current = setTimeout(() => {
+            saveNotes(newNotes);
+        }, 1500);
+    };
+
+    // Manual save handler
+    const handleManualSave = () => {
+        // Clear any pending auto-save
+        if (notesTimeoutRef.current) {
+            clearTimeout(notesTimeoutRef.current);
+        }
+        setIsSaving(true);
+        saveNotes(notes);
+        toast.success("Notes saved successfully!");
+    };
+
+    // Format time since last save
+    const formatTimeSince = (date) => {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return "just now";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        return `${hours}h ago`;
+    };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (notesTimeoutRef.current) {
+                clearTimeout(notesTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // Debug logs
     console.log('🎬 Render check:');
     console.log('  youtubeEmbed:', youtubeEmbed);
@@ -375,7 +461,7 @@ function LessonPlayer() {
     console.log('  lessonId:', lessonId);
 
     return (
-        
+
         <div className={styles.page}>
 
             <div className={styles.container}>
@@ -456,8 +542,43 @@ function LessonPlayer() {
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>Your Notes</div>
                         <div className={styles.cardBody}>
-                            <textarea className={styles.notes} placeholder="Take quick notes about this lesson (local only)"></textarea>
-                            <small className={styles.smallMeta}>Notes are stored locally in your browser.</small>
+                            <textarea
+                                className={styles.notes}
+                                placeholder="Take quick notes about this lesson (local only)"
+                                value={notes}
+                                onChange={handleNotesChange}
+                            />
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: '8px'
+                                }}
+                            >
+                                <small className={styles.smallMeta}>
+                                    {isSaving && "Saving..."}
+                                    {!isSaving && lastSaved && `Saved ${formatTimeSince(lastSaved)}`}
+                                    {!isSaving && !lastSaved && "Notes are stored locally in your browser."}
+                                </small>
+
+                                <button
+                                    onClick={handleManualSave}
+                                    disabled={isSaving}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: '13px',
+                                        backgroundColor: '#4f46e5',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: isSaving ? 'not-allowed' : 'pointer',
+                                        opacity: isSaving ? 0.6 : 1,
+                                    }}
+                                >
+                                    {isSaving ? "Saving..." : "Save"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </aside>
