@@ -300,6 +300,18 @@
   background: rgba(255,255,255,0.03);
 }
 
+.topRow {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.headingBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 /* --------------------
    Sidebar (right) & cards
    -------------------- */
@@ -395,3 +407,4 @@
     transition: none !important;
   }
 }
+
