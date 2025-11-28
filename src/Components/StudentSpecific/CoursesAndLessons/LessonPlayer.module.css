@@ -115,7 +115,8 @@
 .lessonPanel{
   position: absolute;
   /* place panel just left of the container (no brittle viewport math) */
-  left: calc(-1 * (var(--panel-width) + var(--panel-gap)));
+  /* left: calc(-1 * (var(--panel-width) + var(--panel-gap))); */
+  left: 10px;
   top: 12px; /* small offset so it doesn't collide with header gutters */
   width: var(--panel-width);
   max-height: calc(100vh - 40px);
@@ -327,6 +328,7 @@
 @media (prefers-reduced-motion: reduce){
   *{ transition: none !important; }
 }
+
 
 
 
