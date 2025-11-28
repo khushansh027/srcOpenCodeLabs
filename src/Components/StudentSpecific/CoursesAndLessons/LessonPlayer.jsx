@@ -416,97 +416,91 @@ function LessonPlayer() {
   };
 
   // render
-  return (
-        <div className={styles.page}>
-            {/* Lesson Navigation Panel (LEFT) */}
-            <div className={`${styles.lessonPanel} ${!showSidebar ? styles.lessonPanelHidden : ''}`}>
-                <div className={styles.lessonPanelHeader}>
-                    <div className={styles.lessonPanelTitle}>{course?.title || "Course"}</div>
-                    <div className={styles.lessonPanelSubtitle}>
-                        {allLessons.length} lesson{allLessons.length !== 1 ? 's' : ''}
+return (
+    <div className={styles.page}>
+            {/* Main Content */}
+            <div className={`${styles.container} ${showSidebar ? styles.containerWithPanel : styles.containerWithoutPanel}`}>
+    
+                {/* ✅ Lesson Navigation Panel moved INSIDE container */}
+                <div className={`${styles.lessonPanel} ${!showSidebar ? styles.lessonPanelHidden : ''}`}>
+                    <div className={styles.lessonPanelHeader}>
+                        <div className={styles.lessonPanelTitle}>{course?.title || "Course"}</div>
+                        <div className={styles.lessonPanelSubtitle}>
+                            {allLessons.length} lesson{allLessons.length !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+    
+                    <div className={styles.lessonList}>
+                        {allLessons.map((l, index) => {
+                            const isActive = l.id === lessonId;
+                            const isCompleted = completedSet.has(l.id);
+    
+                            return (
+                                <div
+                                    key={l.id}
+                                    className={`${styles.lessonItem} ${isActive ? styles.lessonItemActive : ''}`}
+                                    onClick={() => {
+                                        if (l.id !== lessonId) {
+                                            navigate(`/courses/${courseId}/lessons/${l.id}`, {
+                                                state: { lesson: l },
+                                                replace: false
+                                            });
+                                            window.scrollTo(0, 0);
+                                        }
+                                    }}
+                                >
+                                    <span className={styles.lessonNumber}>{index + 1}</span>
+                                    <span className={styles.lessonTitle}>{l.title || "Untitled"}</span>
+                                    {isCompleted && <span className={styles.lessonCompleted}>✓</span>}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-
-                <div className={styles.lessonList}>
-                    {allLessons.map((l, index) => {
-                        const isActive = l.id === lessonId;
-                        const isCompleted = completedSet.has(l.id);
-
-                        return (
-                            <div
-                                key={l.id}
-                                className={`${styles.lessonItem} ${isActive ? styles.lessonItemActive : ''}`}
-                                onClick={() => {
-                                    if (l.id !== lessonId) {
-                                        navigate(`/courses/${courseId}/lessons/${l.id}`, {
-                                            state: { lesson: l },
-                                            replace: false
-                                        });
-                                        window.scrollTo(0, 0);
-                                    }
-                                }}
-                            >
-                                <span className={styles.lessonNumber}>{index + 1}</span>
-                                <span className={styles.lessonTitle}>{l.title || "Untitled"}</span>
-                                {isCompleted && <span className={styles.lessonCompleted}>✓</span>}
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Main Content (container includes the header where toggle lives) */}
-            <div className={`${styles.container} ${showSidebar ? styles.containerWithPanel : styles.containerWithoutPanel}`}>
+                {/* ✅ Panel move ends here */}
+    
                 <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
-                  <header className={styles.header}>
-                      {/* Row 1 → ONLY toggle button */}
-                      <div className={styles.topRow}>
-                          <button
-                              className={styles.togglePanelBtn}
-                              onClick={() => setShowSidebar(!showSidebar)}
-                              aria-expanded={showSidebar}
-                              aria-label={showSidebar ? 'Hide lessons' : 'Show lessons'}
-                          >
-                              {showSidebar ? '◄ Hide' : '☰ Lessons'}
-                          </button>
-                      </div>
-                    
-                    {/* Row 2 → Title + Meta */}
-                    <div className={styles.headingBlock}>
-                        <h1 id="lesson-title" className={styles.title}>
-                            {lesson.title || "Untitled Lesson"}
-                        </h1>
-                
-                        <div className={styles.meta}>
-                            <div className={styles.metaLeft}>
-                                <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
-                                {displayDuration && <span className={styles.bullet}>•</span>}
-                                {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
-                            </div>
-                
-                            <div className={styles.metaRight}>
-                                {isCompleted ? (
-                                    <span className={styles.completed}>Completed ✅</span>
-                                ) : (
-                                    <span className={styles.notCompleted}>Not completed</span>
-                                )}
+                    <header className={styles.header}>
+    
+                        {/* Row 1 → Toggle Button */}
+                        <div className={styles.topRow}>
+                            <button
+                                className={styles.togglePanelBtn}
+                                onClick={() => setShowSidebar(!showSidebar)}
+                                aria-expanded={showSidebar}
+                                aria-label={showSidebar ? 'Hide lessons' : 'Show lessons'}
+                            >
+                                {showSidebar ? '◄ Hide' : '☰ Lessons'}
+                            </button>
+                        </div>
+    
+                        {/* Row 2 → Title + Meta */}
+                        <div className={styles.headingBlock}>
+                            <h1 id="lesson-title" className={styles.title}>
+                                {lesson.title || "Untitled Lesson"}
+                            </h1>
+    
+                            <div className={styles.meta}>
+                                <div className={styles.metaLeft}>
+                                    <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
+                                    {displayDuration && <span className={styles.bullet}>•</span>}
+                                    {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
+                                </div>
+    
+                                <div className={styles.metaRight}>
+                                    {isCompleted ? (
+                                        <span className={styles.completed}>Completed ✅</span>
+                                    ) : (
+                                        <span className={styles.notCompleted}>Not completed</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>          
-                  </header>
-                  
+                    </header>
+    
                     <section className={styles.playerWrap} aria-label="Video player">
                         {youtubeEmbed ? (
                             <div className={styles.embed}>
-                                {/* <iframe
-                                    ref={iframeRef}
-                                    id={`yt-player-${lessonId}`}
-                                    className={styles.iframe}
-                                    title={lesson.title || "lesson-video"}
-                                    src={`https://www.youtube.com/embed/${extractYouTubeId(lesson.videoUrl)}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                /> */}
                                 <div
                                     id={`yt-player-container-${lessonId}`}
                                     ref={playerContainerRef}
@@ -629,4 +623,5 @@ function LessonPlayer() {
 }
 
 export default LessonPlayer;
+
 
