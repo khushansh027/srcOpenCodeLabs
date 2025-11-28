@@ -458,28 +458,32 @@ function LessonPlayer() {
             {/* Main Content (container includes the header where toggle lives) */}
             <div className={`${styles.container} ${showSidebar ? styles.containerWithPanel : styles.containerWithoutPanel}`}>
                 <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
-                    <header className={styles.header}>
-                        {/* Toggle Lesson Panel Button (moved into header to avoid overlapping navbar) */}
-                        <button
-                            className={styles.togglePanelBtn}
-                            onClick={() => setShowSidebar(!showSidebar)}
-                            aria-expanded={showSidebar}
-                            aria-label={showSidebar ? 'Hide lessons' : 'Show lessons'}
-                        >
-                            {showSidebar ? '◄ Hide' : '☰ Lessons'}
-                        </button>
-
+                  <header className={styles.header}>
+                      {/* Row 1 → ONLY toggle button */}
+                      <div className={styles.topRow}>
+                          <button
+                              className={styles.togglePanelBtn}
+                              onClick={() => setShowSidebar(!showSidebar)}
+                              aria-expanded={showSidebar}
+                              aria-label={showSidebar ? 'Hide lessons' : 'Show lessons'}
+                          >
+                              {showSidebar ? '◄ Hide' : '☰ Lessons'}
+                          </button>
+                      </div>
+                    
+                    {/* Row 2 → Title + Meta */}
+                    <div className={styles.headingBlock}>
                         <h1 id="lesson-title" className={styles.title}>
                             {lesson.title || "Untitled Lesson"}
                         </h1>
-
+                
                         <div className={styles.meta}>
                             <div className={styles.metaLeft}>
                                 <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
                                 {displayDuration && <span className={styles.bullet}>•</span>}
                                 {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
                             </div>
-
+                
                             <div className={styles.metaRight}>
                                 {isCompleted ? (
                                     <span className={styles.completed}>Completed ✅</span>
@@ -488,8 +492,9 @@ function LessonPlayer() {
                                 )}
                             </div>
                         </div>
-                    </header>
-
+                    </div>          
+                  </header>
+                  
                     <section className={styles.playerWrap} aria-label="Video player">
                         {youtubeEmbed ? (
                             <div className={styles.embed}>
@@ -624,3 +629,4 @@ function LessonPlayer() {
 }
 
 export default LessonPlayer;
+
