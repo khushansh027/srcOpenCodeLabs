@@ -215,28 +215,33 @@ function LessonPlayer() {
 
             const initYT = async () => {
                 try {
+                    // CRITICAL FIX: Wait for React to render the component first
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    if (!mounted) return;
+
                     await loadYouTubeIframeAPI();
                     if (!mounted) return;
 
                     const iframeId = `yt-player-${lessonId}`;
                     console.log('🔍 Waiting for iframe with id:', iframeId);
 
-                    // FIXED: Wait for iframe to exist in DOM (retry up to 10 times)
+                    // Wait for iframe to exist in DOM (retry up to 20 times)
                     const waitForIframe = () => {
                         return new Promise((resolve, reject) => {
                             let attempts = 0;
-                            const maxAttempts = 20; // 20 attempts = 2 seconds max wait
-
+                            const maxAttempts = 30; // Increased to 30 attempts = 3 seconds max wait
+                            
                             const checkIframe = () => {
                                 attempts++;
                                 const iframe = document.getElementById(iframeId);
-
+                                
                                 if (iframe) {
                                     console.log('✅ Found iframe after', attempts, 'attempts');
                                     resolve(iframe);
                                 } else if (attempts >= maxAttempts) {
                                     console.error('❌ Iframe not found after', maxAttempts, 'attempts');
-
+                                    
                                     // Debug info
                                     const allIframes = document.querySelectorAll('iframe');
                                     console.log('All iframes on page:', allIframes.length);
@@ -246,14 +251,14 @@ function LessonPlayer() {
                                             class: iframe.className,
                                         });
                                     });
-
+                                    
                                     reject(new Error('Iframe not found'));
                                 } else {
                                     // Try again in 100ms
                                     setTimeout(checkIframe, 100);
                                 }
                             };
-
+                            
                             checkIframe();
                         });
                     };
@@ -269,7 +274,7 @@ function LessonPlayer() {
                             events: {
                                 onReady: (event) => {
                                     console.log('✅ YouTube player ready');
-
+                                    
                                     intervalId = setInterval(() => {
                                         if (!playerInstance || didDispatchRef.current || !mounted) {
                                             return;
@@ -278,15 +283,15 @@ function LessonPlayer() {
                                         try {
                                             const duration = playerInstance.getDuration();
                                             const currentTime = playerInstance.getCurrentTime();
-
+                                            
                                             if (duration > 0 && currentTime > 0) {
                                                 const percent = (currentTime / duration) * 100;
-
+                                                
                                                 // Log every 10 seconds
                                                 if (Math.floor(currentTime) % 10 === 0) {
                                                     console.log('📊', currentTime.toFixed(0), '/', duration.toFixed(0), 's -', percent.toFixed(1) + '%');
                                                 }
-
+                                                
                                                 if (percent >= 80 && !completedSet.has(lessonId)) {
                                                     if (enrollment?.id) {
                                                         console.log('🎉 80% REACHED! Marking complete...');
@@ -297,7 +302,7 @@ function LessonPlayer() {
                                                             })
                                                         );
                                                         didDispatchRef.current = true;
-
+                                                        
                                                         // Clear interval after marking complete
                                                         if (intervalId) {
                                                             clearInterval(intervalId);
@@ -403,7 +408,13 @@ function LessonPlayer() {
         }
     };
 
-    if (!lesson) return <p className={styles.loading}>Loading lesson...</p>;
+    if (!lesson || !course) {
+        return (
+            <div className={styles.page}>
+                <div className={styles.loading}>Loading lesson...</div>
+            </div>
+        );
+    }
 
     // derive some lightweight metadata for display
     const displayDuration =

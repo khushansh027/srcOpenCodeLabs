@@ -33,7 +33,7 @@
 
 /* Adjust main container when lesson panel is open */
 .containerWithPanel {
-    padding-left: 300px;
+    padding-left: 300px; /* 280px panel + 20px breathing room */
 }
 
 .containerWithoutPanel {
