@@ -42,6 +42,8 @@ function LessonPlayer() {
     const videoRef = useRef(null);
     const didDispatchRef = useRef(false);
     const durationFetchRef = useRef(false);
+    const playerContainerRef = useRef(null);
+    const ytPlayerRef = useRef(null); // store the YT player instance
     const [videoDuration, setVideoDuration] = useState(null);
     // notes state
     const [notes, setNotes] = useState("");
@@ -51,7 +53,7 @@ function LessonPlayer() {
 
     // Generate unique key for this lesson's notes
     const notesKey = `lesson-notes-${courseId}-${lessonId}`;
-    
+
     // ref to track if we've shown the admin toast
     const adminToastShownRef = useRef(false);
 
@@ -133,27 +135,25 @@ function LessonPlayer() {
             mounted = false;
         };
     }, [lesson?.videoUrl]);
-
-    // track video progress and mark lesson complete at 80%
     useEffect(() => {
-        const v = videoRef.current;
         if (!lesson) return;
 
-        if (!youtubeEmbed && v) {
+        // --- Native <video> handling (HTML5 video element) ---
+        if (!youtubeEmbed) {
+            const v = videoRef.current;
+            if (!v) return;
+
             const onTimeUpdate = () => {
                 console.log('🎥 TimeUpdate Event Fired');
-                console.log('didDispatchRef.current:', didDispatchRef.current);
-                console.log('enrollment?.id:', enrollment?.id);
-                console.log('lessonId:', lessonId);
-                console.log('completedSet.has(lessonId):', completedSet.has(lessonId));
-
                 if (didDispatchRef.current) {
                     console.log('⏭️ Already dispatched, skipping');
                     return;
                 }
 
                 const nativeDuration =
-                    typeof v.duration === "number" && isFinite(v.duration) && v.duration > 0 ? v.duration : null;
+                    typeof v.duration === 'number' && isFinite(v.duration) && v.duration > 0
+                        ? v.duration
+                        : null;
                 const duration = nativeDuration || videoDuration || 0;
 
                 console.log('Video duration:', duration);
@@ -196,159 +196,178 @@ function LessonPlayer() {
                 }
             };
 
-            v.addEventListener("timeupdate", onTimeUpdate);
-            v.addEventListener("ended", onTimeUpdate);
-
+            v.addEventListener('timeupdate', onTimeUpdate);
+            v.addEventListener('ended', onTimeUpdate);
             console.log('🎬 Event listeners attached to video element');
 
             return () => {
-                v.removeEventListener("timeupdate", onTimeUpdate);
-                v.removeEventListener("ended", onTimeUpdate);
-                console.log('🧹 Event listeners removed');
+                v.removeEventListener('timeupdate', onTimeUpdate);
+                v.removeEventListener('ended', onTimeUpdate);
+                console.log('🧹 Event listeners removed from video element');
             };
         }
 
-        // YouTube embed handling with debug logs
-        if (youtubeEmbed) {
-        let playerInstance = null;
+        // --- YouTube embed handling (use API to create iframe inside a container div) ---
         let mounted = true;
-        let intervalId = null;
+        let progressInterval = null;
 
-        const initYT = async () => {
+        const initYouTubePlayer = async () => {
             try {
-            await loadYouTubeIframeAPI();
-            if (!mounted) return;
+                await loadYouTubeIframeAPI(); // your existing loader that resolves when YT API ready
+                if (!mounted) return;
 
-            const iframeId = `yt-player-${lessonId}`;
-            console.log('🔍 Waiting for iframe with id:', iframeId);
-
-            // helper to find iframe element (prefer ref)
-            const getIframeElement = () => iframeRef.current || document.getElementById(iframeId);
-
-            // wait loop — prefer ref but fall back to id; make attempts longer
-            let attempts = 0;
-            const maxAttempts = 50; // ~5 seconds
-            let iframeEl = getIframeElement();
-
-            while (!iframeEl && attempts < maxAttempts && mounted) {
-                attempts++;
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                iframeEl = getIframeElement();
-            }
-
-            if (!iframeEl) {
-                console.error('❌ Iframe not found after', attempts, 'attempts');
-                const allIframes = document.querySelectorAll('iframe');
-                console.log('All iframes on page:', allIframes.length);
-                allIframes.forEach((iframe, idx) => {
-                console.log(`  iframe ${idx}:`, { id: iframe.id || '(no id)', class: iframe.className });
-                });
-                throw new Error('Iframe not found');
-            }
-
-            console.log('✅ Found iframe DOM node, initializing player', iframeEl);
-
-            // Pass the actual DOM element (works even if id lookups would have failed)
-            playerInstance = new window.YT.Player(iframeEl, {
-                events: {
-                onReady: (event) => {
-                    console.log('✅ YouTube player ready');
-
-                    intervalId = setInterval(() => {
-                    if (!playerInstance || didDispatchRef.current || !mounted) {
-                        return;
-                    }
-
-                    try {
-                        const duration = playerInstance.getDuration();
-                        const currentTime = playerInstance.getCurrentTime();
-
-                        if (duration > 0 && currentTime > 0) {
-                        const percent = (currentTime / duration) * 100;
-
-                        if (Math.floor(currentTime) % 10 === 0) {
-                            console.log('📊', currentTime.toFixed(0), '/', duration.toFixed(0), 's -', percent.toFixed(1) + '%');
-                        }
-
-                        if (percent >= 80 && !completedSet.has(lessonId)) {
-                            if (enrollment?.id) {
-                            console.log('🎉 80% REACHED! Marking complete...');
-                            dispatch(
-                                markLessonCompletedByEnrollment({
-                                enrollmentId: enrollment.id,
-                                lessonId,
-                                })
-                            );
-                            didDispatchRef.current = true;
-
-                            if (intervalId) {
-                                clearInterval(intervalId);
-                                intervalId = null;
-                            }
-                            } else {
-                            if (user?.role === 'admin' && !adminToastShownRef.current) {
-                                toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
-                                adminToastShownRef.current = true;
-                                console.log('ℹ️ No enrollment found (admin preview mode)');
-                            } else {
-                                console.warn('⚠️ Cannot mark complete: no enrollment');
-                                console.log('enrollment object:', enrollment);
-                            }
-                            }
-                        }
-                        }
-                    } catch (e) {
-                        console.warn("Error tracking progress:", e);
-                    }
-                    }, 2000); // Check every 2 seconds
-                },
-                onStateChange: (event) => {
-                    const states = {
-                    '-1': 'unstarted',
-                    '0': 'ended',
-                    '1': 'playing',
-                    '2': 'paused',
-                    '3': 'buffering',
-                    '5': 'cued'
-                    };
-                    console.log('🎬 Player state:', states[event.data] || event.data);
-                },
-                onError: (event) => {
-                    console.error('❌ YouTube player error:', event.data);
+                const container = playerContainerRef?.current;
+                if (!container) {
+                    console.error('❌ YT container not mounted');
+                    return;
                 }
-                },
-            });
+
+                // extract videoId from lesson.videoUrl or youtubeEmbed
+                const videoId =
+                    (typeof extractYouTubeId === 'function' && extractYouTubeId(lesson.videoUrl)) ||
+                    (youtubeEmbed && (() => {
+                        // youtubeEmbed might be like https://www.youtube.com/embed/<id>?...
+                        try {
+                            const m = youtubeEmbed.match(/\/embed\/([^?&/]+)/);
+                            return m ? m[1] : null;
+                        } catch (e) {
+                            return null;
+                        }
+                    })()) ||
+                    null;
+
+                if (!videoId) {
+                    console.error('❌ Could not extract videoId for YouTube player:', lesson?.videoUrl, youtubeEmbed);
+                    return;
+                }
+
+                // Destroy previous YT player if any
+                if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === 'function') {
+                    try {
+                        ytPlayerRef.current.destroy();
+                    } catch (e) {
+                        console.warn('Error destroying previous YT player:', e);
+                    }
+                    ytPlayerRef.current = null;
+                }
+
+                // Create player: pass the container element so the API creates the iframe
+                ytPlayerRef.current = new window.YT.Player(container, {
+                    height: '100%',
+                    width: '100%',
+                    videoId,
+                    playerVars: {
+                        rel: 0,
+                        enablejsapi: 1,
+                        origin: window.location.origin,
+                    },
+                    events: {
+                        onReady: () => {
+                            console.log('✅ YT player ready (API-created iframe)', { videoId });
+
+                            // Poll progress every 2 seconds (mirrors previous behavior)
+                            progressInterval = setInterval(() => {
+                                try {
+                                    if (!ytPlayerRef.current || didDispatchRef.current || !mounted) return;
+
+                                    const duration = ytPlayerRef.current.getDuration();
+                                    const currentTime = ytPlayerRef.current.getCurrentTime();
+
+                                    if (duration > 0 && typeof currentTime === 'number') {
+                                        const percent = (currentTime / duration) * 100;
+
+                                        // occasional log for debugging
+                                        if (Math.floor(currentTime) % 10 === 0) {
+                                            console.log('📊', Math.floor(currentTime), '/', Math.floor(duration), 's -', percent.toFixed(1) + '%');
+                                        }
+
+                                        if (percent >= 80 && !completedSet.has(lessonId)) {
+                                            if (enrollment?.id) {
+                                                console.log('🎉 80% REACHED! Marking complete (YT)...');
+                                                dispatch(
+                                                    markLessonCompletedByEnrollment({
+                                                        enrollmentId: enrollment.id,
+                                                        lessonId,
+                                                    })
+                                                );
+                                                didDispatchRef.current = true;
+
+                                                // stop interval after dispatch
+                                                if (progressInterval) {
+                                                    clearInterval(progressInterval);
+                                                    progressInterval = null;
+                                                }
+                                            } else {
+                                                if (user?.role === 'admin' && !adminToastShownRef.current) {
+                                                    toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
+                                                    adminToastShownRef.current = true;
+                                                    console.log('ℹ️ No enrollment found (admin preview mode)');
+                                                } else {
+                                                    console.warn('⚠️ Cannot mark complete: no enrollment');
+                                                    console.log('enrollment object:', enrollment);
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    // Ignore transient API timing errors
+                                }
+                            }, 2000);
+                        },
+
+                        onStateChange: (event) => {
+                            const states = {
+                                '-1': 'unstarted',
+                                '0': 'ended',
+                                '1': 'playing',
+                                '2': 'paused',
+                                '3': 'buffering',
+                                '5': 'cued',
+                            };
+                            console.log('🎬 Player state:', states[event.data] || event.data);
+                        },
+
+                        onError: (event) => {
+                            console.error('❌ YouTube player error:', event?.data ?? event);
+                        },
+                    },
+                });
             } catch (err) {
-            console.error("❌ Failed to initialize YouTube player:", err);
+                console.error('❌ Failed to initialize YouTube player:', err);
             }
         };
 
-        initYT();
+        initYouTubePlayer();
 
         return () => {
-            console.log('🧹 Cleaning up YouTube player');
             mounted = false;
-            if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
             }
-            if (playerInstance && typeof playerInstance.destroy === 'function') {
-            try {
-                playerInstance.destroy();
-                playerInstance = null;
-            } catch (e) {
-                console.warn('Error destroying player:', e);
-            }
+            if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === 'function') {
+                try {
+                    ytPlayerRef.current.destroy();
+                } catch (e) {
+                    console.warn('Error destroying YT player during cleanup:', e);
+                }
+                ytPlayerRef.current = null;
             }
         };
-        }
+        // NOTE: include stableEnrollmentId and others that affect dispatch logic
     }, [
         dispatch,
         lessonId,
         youtubeEmbed,
-        stableEnrollmentId
+        stableEnrollmentId,
+        videoDuration,
+        // completedSet is likely a Set from redux; include it so updates retrigger effect if it changes
+        completedSet,
+        enrollment?.id,
+        user?.role,
+        lesson,
     ]);
-    
+
     // Refetch lesson when lessonId changes (for navigation)
     useEffect(() => {
         if (courseId && lessonId && !storeLesson) {
@@ -495,7 +514,7 @@ function LessonPlayer() {
     return (
         <div className={styles.page}>
             {/* Toggle Lesson Panel Button */}
-            <button 
+            <button
                 className={styles.togglePanelBtn}
                 onClick={() => setShowSidebar(!showSidebar)}
             >
@@ -510,12 +529,12 @@ function LessonPlayer() {
                         {allLessons.length} lesson{allLessons.length !== 1 ? 's' : ''}
                     </div>
                 </div>
-                
+
                 <div className={styles.lessonList}>
                     {allLessons.map((l, index) => {
                         const isActive = l.id === lessonId;
                         const isCompleted = completedSet.has(l.id);
-                        
+
                         return (
                             <div
                                 key={l.id}
@@ -568,7 +587,7 @@ function LessonPlayer() {
                     <section className={styles.playerWrap} aria-label="Video player">
                         {youtubeEmbed ? (
                             <div className={styles.embed}>
-                                <iframe
+                                {/* <iframe
                                     ref={iframeRef}
                                     id={`yt-player-${lessonId}`}
                                     className={styles.iframe}
@@ -576,6 +595,12 @@ function LessonPlayer() {
                                     src={`https://www.youtube.com/embed/${extractYouTubeId(lesson.videoUrl)}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
+                                /> */}
+                                <div
+                                    id={`yt-player-container-${lessonId}`}
+                                    ref={playerContainerRef}
+                                    className={styles.iframeContainer}
+                                    title={lesson.title || "lesson-video-container"}
                                 />
                             </div>
                         ) : (
@@ -599,7 +624,7 @@ function LessonPlayer() {
                                 </span>
                             )}
                         </button>
-                        
+
                         <button
                             className={styles.navButton}
                             onClick={handleNextLesson}
