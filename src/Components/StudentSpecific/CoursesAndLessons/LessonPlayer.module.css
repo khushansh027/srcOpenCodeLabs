@@ -14,13 +14,13 @@
 
 /* Page container */
 .page {
-    background: linear-gradient(45deg, #05060a 30%, #1e1e1e 80%);
-    color: var(--text);
-    padding: 28px 20px;
-    min-height: 80vh;
-    box-sizing: border-box;
-    padding-top: var(--navbar-height);
-    position: relative;
+  background: linear-gradient(45deg, #05060a 30%, #1e1e1e 80%);
+  color: var(--text);
+  padding: 28px 20px;       /* keep normal padding */
+  min-height: 80vh;
+  box-sizing: border-box;
+  padding-top: 28px;        /* keep top spacing, not navbar height */
+  position: relative;
 }
 
 /* overall content grid: player left, sidebar right */
@@ -34,21 +34,26 @@
     transition: none; /* Remove transition to prevent shift */
 }
 
-/* toggle button — inline inside header, keep look consistent */
+/* Toggle button — inline inside header now (no fixed positioning) */
 .togglePanelBtn {
-  appearance: none;
-  border: none;
-  background: transparent;
+  position: relative;       /* inline with header */
+  left: 0;
+  top: 0;
+  z-index: 10;
+  background: transparent;  /* you can keep colored background if you prefer */
   color: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  margin-right: 12px;
-  padding: 6px 8px;
+  border: none;
   border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .togglePanelBtn:hover {
-  background: rgba(0,0,0,0.04);
+  background: rgba(255,255,255,0.03);
 }
 
 /* Adjust main container when lesson panel is open */
@@ -247,13 +252,13 @@
 
 /* Lesson Navigation Panel (LEFT side) */
 .lessonPanel {
-  position: absolute;
-  top: calc(var(--navbar-height) + 8px);
+  position: absolute; /* stays left, but below header */
+  top: 20px;
   left: 12px;
   width: 260px;
-  max-height: calc(100vh - calc(var(--navbar-height) + 24px));
+  max-height: calc(100vh - 40px);
   overflow: auto;
-  z-index: 50;
+  z-index: 30;
   transition: transform 200ms ease, opacity 200ms ease;
 }
 
@@ -476,4 +481,5 @@
     }
 
 }
+
 
