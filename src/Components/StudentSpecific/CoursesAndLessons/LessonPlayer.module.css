@@ -154,6 +154,165 @@
     color: var(--primary);
 }
 
+/* Lesson Navigation Panel (LEFT side) */
+.lessonPanel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    background: #1f2937;
+    border-right: 1px solid #374151;
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s ease;
+}
+
+.lessonPanelHidden {
+    transform: translateX(-100%);
+}
+
+.lessonPanelHeader {
+    padding: 20px;
+    border-bottom: 1px solid #374151;
+    position: sticky;
+    top: 0;
+    background: #1f2937;
+    z-index: 10;
+}
+
+.lessonPanelTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f3f4f6;
+    margin-bottom: 8px;
+}
+
+.lessonPanelSubtitle {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.lessonList {
+    padding: 12px;
+}
+
+.lessonItem {
+    padding: 12px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lessonItem:hover {
+    background: #374151;
+    border-color: #4f46e5;
+}
+
+.lessonItemActive {
+    background: #4f46e5;
+    border-color: #6366f1;
+}
+
+.lessonNumber {
+    font-size: 14px;
+    color: #9ca3af;
+    font-weight: 500;
+    min-width: 24px;
+}
+
+.lessonItemActive .lessonNumber {
+    color: #e0e7ff;
+}
+
+.lessonTitle {
+    font-size: 14px;
+    color: #f3f4f6;
+    flex: 1;
+}
+
+.lessonItemActive .lessonTitle {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.lessonCompleted {
+    font-size: 12px;
+    color: #10b981;
+}
+
+.togglePanelBtn {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    z-index: 200;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.togglePanelBtn:hover {
+    background: #4338ca;
+}
+
+/* Navigation buttons */
+.navigationButtons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 20px;
+}
+
+.navButton {
+    flex: 1;
+    padding: 12px 20px;
+    border: 1px solid #4f46e5;
+    background: transparent;
+    color: #4f46e5;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.navButton:hover:not(:disabled) {
+    background: #4f46e5;
+    color: white;
+}
+
+.navButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #6b7280;
+    color: #6b7280;
+}
+
+/* Adjust main container when lesson panel is open */
+.containerWithPanel {
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
+}
+
+.containerWithoutPanel {
+    margin-left: 0;
+}
+
 /* SIDEBAR (right) */
 .sidebar {
     display: flex;
