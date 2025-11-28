@@ -1,46 +1,290 @@
 :root {
-    --primary: #615fff;
-    --primary-600: #4e48e6;
-    --accent: #7c3aed;
-    --bg: #07080a;
-    --surface: #0f1316;
-    --muted: #9aa4b2;
-    --text: #e6eef8;
-    --glass: rgba(255, 255, 255, 0.02);
-    --card-elev: rgba(97, 95, 255, 0.12);
-    --radius: 12px;
-    --navbar-height: 80.7227px;
+  --primary: #615fff;
+  --primary-600: #4e48e6;
+  --accent: #7c3aed;
+  --bg: #07080a;
+  --surface: #0f1316;
+  --muted: #9aa4b2;
+  --text: #e6eef8;
+  --glass: rgba(255, 255, 255, 0.02);
+  --card-elev: rgba(97, 95, 255, 0.12);
+  --radius: 12px;
+  --navbar-height: 80px; /* keep a sensible default; adjust if you have fixed navbar */
 }
 
-/* Page container */
+/* --------------------
+   Page wrapper / grid
+   -------------------- */
 .page {
   background: linear-gradient(45deg, #05060a 30%, #1e1e1e 80%);
   color: var(--text);
-  padding: 28px 20px;       /* keep normal padding */
+  padding: 28px 20px;
   min-height: 80vh;
   box-sizing: border-box;
-  padding-top: 28px;        /* keep top spacing, not navbar height */
+  /* keep a modest top padding; don't force layout shift for static navbars */
+  padding-top: 28px;
   position: relative;
 }
 
-/* overall content grid: player left, sidebar right */
+/* main centered container — never shifts left/right when panel toggles */
 .container {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 32px;
-    align-items: start;
-    transition: none; /* Remove transition to prevent shift */
+  max-width: 1100px;
+  margin: 0 auto;                 /* stay centered always */
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+  transition: none;
+  padding-left: 0;
 }
 
-/* Toggle button — inline inside header now (no fixed positioning) */
+/* PLAYER COLUMN */
+.playerColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  flex: 1 1 auto;
+}
+
+.metaLeft {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.metaRight {
+  display: flex;
+  gap: 8px;
+}
+
+/* small typographic helpers */
+.completed { color: #10b981; font-weight: 600; }
+.notCompleted { color: var(--muted); }
+.instructor { font-weight: 700; color: var(--primary-600); }
+.duration { color: var(--muted); }
+.bullet { opacity: 0.6; }
+
+/* --------------------
+   Player area & embed
+   -------------------- */
+.playerWrap {
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.02);
+  box-shadow: 0 12px 30px rgba(6, 8, 20, 0.6);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.embed {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: black;
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.nativePlayer {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: black;
+}
+
+.video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: black;
+}
+
+/* navigation buttons */
+.navigationButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 0;
+}
+
+.navButton {
+  flex: 1;
+  padding: 14px 20px;
+  border: 2px solid #4f46e5;
+  background: transparent;
+  color: #4f46e5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 60px;
+}
+
+.navButton:hover:not(:disabled) {
+  background: #4f46e5;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+/* hint text row */
+.controlsRow { display: flex; justify-content: flex-start; margin: 16px 0; }
+.hint { color: var(--muted); font-size: 0.875rem; }
+
+/* content area */
+.content {
+  background: rgba(255,255,255,0.01);
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.02);
+  margin-top: 24px;
+}
+
+.prose {
+  color: #d6dbe4;
+  line-height: 1.7;
+  font-size: 1rem;
+  word-wrap: break-word;
+}
+
+.prose p { margin: 0 0 0.9rem 0; }
+.prose a { color: var(--primary); }
+
+/* --------------------
+   Lesson Panel (left)
+   overlay that does NOT shift layout
+   -------------------- */
+
+/* The panel is visually placed to the left of the centered container.
+   Adjust `--container-width` or the calc if your main container changes. */
+:root {
+  --container-width: 1100px;
+  --panel-width: 260px;
+  --panel-gap: 12px;
+}
+
+.lessonPanel {
+  position: absolute;
+  top: 20px;
+  /* Align panel left edge relative to centered container:
+     (viewport width - container width)/2 is the left gutter. Then subtract panel width + gap
+     so the panel sits visually to the left of the container. Adjust vars if needed. */
+  left: calc((100% - var(--container-width)) / 2 - var(--panel-width) - var(--panel-gap));
+  width: var(--panel-width);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  z-index: 30;
+  transition: transform 200ms ease, opacity 200ms ease;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  background: rgba(11, 14, 18, 0.92);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.02);
+  padding-bottom: 8px;
+}
+
+/* hidden state: slide left and disable pointer events */
+.lessonPanelHidden {
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* header inside panel */
+.lessonPanelHeader {
+  padding: 20px;
+  border-bottom: 1px solid #374151;
+  position: sticky;
+  top: 0;
+  background: rgba(31,41,55,0.95);
+  z-index: 10;
+}
+
+.lessonPanelTitle { font-size: 16px; font-weight: 600; color: #f3f4f6; margin-bottom: 8px; }
+.lessonPanelSubtitle { font-size: 13px; color: #9ca3af; }
+
+.lessonList { padding: 12px; }
+
+.lessonItem {
+  padding: 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lessonItem:hover { background: #374151; border-color: #4f46e5; }
+.lessonItemActive { background: #4f46e5; border-color: #6366f1; }
+
+.lessonNumber { font-size: 14px; color: #9ca3af; font-weight: 500; min-width: 24px; }
+.lessonItemActive .lessonNumber { color: #e0e7ff; }
+
+.lessonTitle { font-size: 14px; color: #f3f4f6; flex: 1; line-height: 1.4; }
+.lessonItemActive .lessonTitle { font-weight: 600; color: #ffffff; }
+
+.lessonCompleted { font-size: 12px; color: #10b981; }
+
+/* --------------------
+   Toggle button (moved into header flow)
+   not fixed, so it will move with the header
+   -------------------- */
 .togglePanelBtn {
-  position: relative;       /* inline with header */
+  position: relative;
   left: 0;
   top: 0;
-  z-index: 10;
-  background: transparent;  /* you can keep colored background if you prefer */
+  z-index: 40; /* above panel content visually */
+  background: transparent;
   color: inherit;
   border: none;
   border-radius: 6px;
@@ -56,430 +300,98 @@
   background: rgba(255,255,255,0.03);
 }
 
-/* Adjust main container when lesson panel is open */
-.containerWithPanel {
-    margin-left: 280px; /* make room for sidebar so main content doesn't overlap */
-}
-
-.containerWithoutPanel {
-    margin-left: 20px; /* when collapsed, give small margin */
-}
-
-/* PLAYER COLUMN */
-.playerColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 24px; /* Increased from 18px for more breathing room */
-}
-
-/* header */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  /* keep header above panel if necessary */
-  z-index: 10;
-  position: relative;
-}
-
-.title {
-    font-size: 1.625rem;
-    font-weight: 800;
-    color: #fff;
-    margin: 0;
-}
-
-.meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    color: var(--muted);
-}
-
-.metaLeft {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    color: var(--muted);
-}
-
-.metaRight {
-    display: flex;
-    gap: 8px;
-}
-
-.completed {
-    color: #10b981;
-    font-weight: 600;
-}
-
-.notCompleted {
-    color: var(--muted);
-}
-
-.instructor {
-    font-weight: 700;
-    color: var(--primary-600);
-}
-
-.duration {
-    color: var(--muted);
-}
-
-.bullet {
-    opacity: 0.6;
-}
-
-/* player wrap */
-.playerWrap {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.06));
-    border-radius: 12px;
-    padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    box-shadow: 0 12px 30px rgba(6, 8, 20, 0.6);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 8px;
-}
-
-/* embed & native player */
-.embed {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-}
-
-.nativePlayer {
-    width: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    background: black;
-}
-
-.video {
-    width: 100%;
-    height: auto;
-    display: block;
-    background: black;
-}
-
-/* Navigation buttons */
-.navigationButtons {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin: 24px 0;
-    padding: 0;
-}
-
-.navButton {
-    flex: 1;
-    padding: 14px 20px;
-    border: 2px solid #4f46e5;
-    background: transparent;
-    color: #4f46e5;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    min-height: 60px;
-}
-
-.navButton:hover:not(:disabled) {
-    background: #4f46e5;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.navButton:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    border-color: #6b7280;
-    color: #6b7280;
-}
-
-/* hint text row */
-.controlsRow {
-    display: flex;
-    justify-content: flex-start;
-    margin: 16px 0;
-}
-
-.hint {
-    color: var(--muted);
-    font-size: 0.875rem;
-}
-
-/* content area (lesson description) */
-.content {
-    background: rgba(255, 255, 255, 0.01);
-    border-radius: 10px;
-    padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    margin-top: 24px;
-}
-
-.prose {
-    color: #d6dbe4;
-    line-height: 1.7;
-    font-size: 1rem;
-    word-wrap: break-word;
-}
-
-.prose p {
-    margin: 0 0 0.9rem 0;
-}
-
-.prose a {
-    color: var(--primary);
-}
-
-/* Lesson Navigation Panel (LEFT side) */
-.lessonPanel {
-  position: absolute; /* stays left, but below header */
-  top: 20px;
-  left: 12px;
-  width: 260px;
-  max-height: calc(100vh - 40px);
-  overflow: auto;
-  z-index: 30;
-  transition: transform 200ms ease, opacity 200ms ease;
-}
-
-/* hidden state: slide away */
-.lessonPanelHidden {
-  transform: translateX(-120%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.lessonPanelHeader {
-    padding: 20px;
-    border-bottom: 1px solid #374151;
-    position: sticky;
-    top: 0;
-    background: #1f2937;
-    z-index: 10;
-}
-
-.lessonPanelTitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: #f3f4f6;
-    margin-bottom: 8px;
-}
-
-.lessonPanelSubtitle {
-    font-size: 13px;
-    color: #9ca3af;
-}
-
-.lessonList {
-    padding: 12px;
-}
-
-.lessonItem {
-    padding: 12px;
-    margin-bottom: 6px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.lessonItem:hover {
-    background: #374151;
-    border-color: #4f46e5;
-}
-
-.lessonItemActive {
-    background: #4f46e5;
-    border-color: #6366f1;
-}
-
-.lessonNumber {
-    font-size: 14px;
-    color: #9ca3af;
-    font-weight: 500;
-    min-width: 24px;
-}
-
-.lessonItemActive .lessonNumber {
-    color: #e0e7ff;
-}
-
-.lessonTitle {
-    font-size: 14px;
-    color: #f3f4f6;
-    flex: 1;
-    line-height: 1.4;
-}
-
-.lessonItemActive .lessonTitle {
-    font-weight: 600;
-    color: #ffffff;
-}
-
-.lessonCompleted {
-    font-size: 12px;
-    color: #10b981;
-}
-
-.togglePanelBtn {
-    position: fixed;
-    left: 12px;
-    top: 12px;
-    z-index: 60; /* Higher than lesson panel but lower than navbar */
-    background: #4f46e5;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.togglePanelBtn:hover {
-    background: #4338ca;
-}
-
-/* SIDEBAR (right) */
+/* --------------------
+   Sidebar (right) & cards
+   -------------------- */
 .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Increased from 14px for more breathing room */
-    position: sticky;
-    top: 20px;
-    align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
 }
 
-/* small cards inside sidebar */
 .card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.04));
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    box-shadow: 0 8px 18px rgba(6, 8, 20, 0.5);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.02);
+  box-shadow: 0 8px 18px rgba(6, 8, 20, 0.5);
 }
 
 .cardHeader {
-    padding: 14px 16px;
-    font-weight: 700;
-    color: var(--primary-600);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding: 14px 16px;
+  font-weight: 700;
+  color: var(--primary-600);
+  border-bottom: 1px solid rgba(255,255,255,0.02);
 }
 
-.cardBody {
-    padding: 16px;
-    color: var(--muted);
-}
+.cardBody { padding: 16px; color: var(--muted); }
 
-.courseTitle {
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 6px;
-}
-
-.smallMeta {
-    color: var(--muted);
-    font-size: 0.9rem;
-}
+.courseTitle { font-weight: 800; color: #fff; margin-bottom: 6px; }
+.smallMeta { color: var(--muted); font-size: 0.9rem; }
 
 /* notes textarea */
 .notes {
-    width: 100%;
-    min-height: 90px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(255, 255, 255, 0.02);
-    color: var(--text);
-    padding: 8px;
-    resize: vertical;
-    box-sizing: border-box;
+  width: 100%;
+  min-height: 90px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  padding: 8px;
+  resize: vertical;
+  box-sizing: border-box;
 }
 
 /* small interactive touches */
-.playerWrap:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 22px 56px var(--card-elev);
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 44px rgba(97, 95, 255, 0.08);
-}
+.playerWrap:hover { transform: translateY(-4px); box-shadow: 0 22px 56px var(--card-elev); }
+.card:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(97,95,255,0.08); }
 
 /* Loading state */
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 1.125rem;
-}
+.loading { text-align: center; padding: 40px; color: var(--muted); font-size: 1.125rem; }
 
-/* Responsive: collapse to single column on small screens */
+/* --------------------
+   Responsive adjustments
+   -------------------- */
 @media (max-width: 920px) {
-    .container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding-left: 0 !important;
-    }
+  .container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-left: 0;
+  }
 
-    .containerWithPanel {
-        padding-left: 0 !important;
-    }
+  .lessonPanel {
+    left: 12px;
+    top: 60px;
+    width: 240px;
+  }
 
-    .sidebar {
-        position: static;
-        top: auto;
-    }
+  .togglePanelBtn {
+    top: 8px;
+    left: 8px;
+    z-index: 60;
+  }
 
-    .playerWrap {
-        padding: 8px;
-    }
+  .sidebar {
+    position: static;
+    top: auto;
+  }
 
-    .lessonPanel {
-        width: 240px;
-    }
-
-    .togglePanelBtn {
-        top: 8px;
-        left: 8px;
-    }
+  .playerWrap {
+    padding: 8px;
+  }
 }
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .playerWrap,
-    .card,
-    .container,
-    .page,
-    .lessonPanel,
-    .navButton {
-        transition: none !important;
-    }
-
+  .playerWrap,
+  .card,
+  .container,
+  .page,
+  .lessonPanel,
+  .navButton {
+    transition: none !important;
+  }
 }
-
-
