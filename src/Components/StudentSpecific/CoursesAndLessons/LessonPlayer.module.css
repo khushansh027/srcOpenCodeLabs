@@ -28,8 +28,9 @@
 
 /* main centered container — never shifts left/right when panel toggles */
 .container {
+  position: relative;
   max-width: 1100px;
-  margin: 0 auto;                 /* stay centered always */
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 32px;
@@ -213,17 +214,13 @@
 
 .lessonPanel {
   position: absolute;
-  top: 20px;
-  /* Align panel left edge relative to centered container:
-     (viewport width - container width)/2 is the left gutter. Then subtract panel width + gap
-     so the panel sits visually to the left of the container. Adjust vars if needed. */
-  left: calc((100% - var(--container-width)) / 2 - var(--panel-width) - var(--panel-gap));
+  left: calc(-1 * (var(--panel-width) + var(--panel-gap))); /* place it left of container */
+  top: 0; /* or small offset like 12px */
   width: var(--panel-width);
   max-height: calc(100vh - 40px);
   overflow: auto;
   z-index: 30;
   transition: transform 200ms ease, opacity 200ms ease;
-  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   background: rgba(11, 14, 18, 0.92);
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.02);
@@ -375,9 +372,11 @@
   }
 
   .lessonPanel {
+    position: fixed;
     left: 12px;
-    top: 60px;
+    top: 64px;
     width: 240px;
+    z-index: 60;
   }
 
   .togglePanelBtn {
@@ -407,4 +406,5 @@
     transition: none !important;
   }
 }
+
 
