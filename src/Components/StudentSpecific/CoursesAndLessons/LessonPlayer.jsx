@@ -2,525 +2,422 @@ import { useEffect, useRef, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { userSelector } from "../../../ReduxToolKit/Slices/UserSlice.js";
-import { fetchCourseById, selectCourseById, selectLessonById } from "../../../ReduxToolKit/Slices/CourseAndLessons/CourseSlice.js";
-import { selectEnrollmentByCourseId, markLessonCompletedByEnrollment, fetchEnrollmentForCourse } from "../../../ReduxToolKit/Slices/EnrollmentSlice.js";
-import { fetchVideoDurationInMinutes, extractYouTubeId, convertYouTubeToEmbed, fetchYouTubeDurationViaIframe, loadYouTubeIframeAPI } from "./mediaHelper.js";
-// css
+import {
+  fetchCourseById,
+  selectCourseById,
+  selectLessonById,
+} from "../../../ReduxToolKit/Slices/CourseAndLessons/CourseSlice.js";
+import {
+  selectEnrollmentByCourseId,
+  markLessonCompletedByEnrollment,
+  fetchEnrollmentForCourse,
+} from "../../../ReduxToolKit/Slices/EnrollmentSlice.js";
+import {
+  fetchVideoDurationInMinutes,
+  extractYouTubeId,
+  convertYouTubeToEmbed,
+  fetchYouTubeDurationViaIframe,
+  loadYouTubeIframeAPI,
+} from "./mediaHelper.js";
 import { useToast } from "../../../middleware/ToastProvider.jsx";
 import styles from "./LessonPlayer.module.css";
 
 function LessonPlayer() {
-    // hooks & states
-    const { courseId, lessonId } = useParams();
-    const location = useLocation();
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const iframeRef = useRef(null);
+  // routing / redux
+  const { courseId, lessonId } = useParams();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const toast = useToast();
 
-    // get lesson from location state (if available) or from store
-    const locationLesson = location?.state?.lesson || null;
-    const storeLesson = useSelector((s) => selectLessonById(s, courseId, lessonId));
-    const course = useSelector((s) => selectCourseById(s, courseId));
-    const toast = useToast();
+  // refs & local state
+  const videoRef = useRef(null);
+  const playerContainerRef = useRef(null); // container for YouTube API to create iframe
+  const ytPlayerRef = useRef(null); // YT player instance
+  const didDispatchRef = useRef(false);
+  const durationFetchRef = useRef(false);
+  const adminToastShownRef = useRef(false);
+  const notesTimeoutRef = useRef(null);
 
-    // get logged-in user
-    const user = useSelector(userSelector);
-    const userId = user?.uid;
-    if (!userId) return <div className={styles.loading}>Loading…</div>;
+  const [videoDuration, setVideoDuration] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [notes, setNotes] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
-    // get enrollment for this course
-    const enrollment = useSelector((s) => selectEnrollmentByCourseId(s, courseId));
-    const completedLessons = enrollment?.completedLessons || [];
-    const completedSet = useMemo(() => new Set(completedLessons), [completedLessons]);
-    const stableEnrollmentId = enrollment?.id;
-    const lesson = storeLesson || locationLesson;
-    const youtubeEmbed = convertYouTubeToEmbed(lesson?.videoUrl);
+  // user & store selectors
+  const user = useSelector(userSelector);
+  const userId = user?.uid;
+  const storeLesson = useSelector((s) => selectLessonById(s, courseId, lessonId));
+  const course = useSelector((s) => selectCourseById(s, courseId));
+  const enrollment = useSelector((s) => selectEnrollmentByCourseId(s, courseId));
 
-    // sidebar visibility state
-    const [showSidebar, setShowSidebar] = useState(true);
-    // refs and state for video tracking
-    const videoRef = useRef(null);
-    const didDispatchRef = useRef(false);
-    const durationFetchRef = useRef(false);
-    const playerContainerRef = useRef(null);
-    const ytPlayerRef = useRef(null); // store the YT player instance
-    const [videoDuration, setVideoDuration] = useState(null);
-    // notes state
-    const [notes, setNotes] = useState("");
-    const [isSaving, setIsSaving] = useState(false);
-    const [lastSaved, setLastSaved] = useState(null);
-    const notesTimeoutRef = useRef(null);
+  // immediate guard
+  if (!userId) return <div className={styles.loading}>Loading…</div>;
 
-    // Generate unique key for this lesson's notes
-    const notesKey = `lesson-notes-${courseId}-${lessonId}`;
+  // data derived
+  const completedLessons = enrollment?.completedLessons || [];
+  const completedSet = useMemo(() => new Set(completedLessons), [completedLessons]);
+  const stableEnrollmentId = enrollment?.id;
+  const locationLesson = location?.state?.lesson || null;
+  const lesson = storeLesson || locationLesson;
+  const youtubeEmbed = convertYouTubeToEmbed(lesson?.videoUrl);
 
-    // ref to track if we've shown the admin toast
-    const adminToastShownRef = useRef(false);
+  // notes key
+  const notesKey = `lesson-notes-${courseId}-${lessonId}`;
 
-    // Debug logs    
-    useEffect(() => {
-        console.log('=== LessonPlayer State ===');
-        console.log('courseId:', courseId);
-        console.log('lessonId:', lessonId);
-        console.log('userId:', userId);
-        console.log('enrollment:', enrollment);
-        console.log('completedLessons:', completedLessons);
-        console.log('========================');
-    }, [courseId, lessonId, userId, enrollment, completedLessons]);
+  // Minimal helpful debug
+  useEffect(() => {
+    console.log("LessonPlayer mounted:", { courseId, lessonId, userId });
+  }, [courseId, lessonId, userId]);
 
-    // fetch course if not in store
-    useEffect(() => {
-        if (courseId && !course) {
-            dispatch(fetchCourseById(courseId));
-        }
-    }, [dispatch, courseId, course]);
+  // fetch course if missing
+  useEffect(() => {
+    if (courseId && !course) {
+      dispatch(fetchCourseById(courseId));
+    }
+  }, [dispatch, courseId, course]);
 
-    // fetch enrollment if not in store
-    useEffect(() => {
-        // Only fetch if we have both IDs and don't already have the enrollment
-        if (courseId && userId && !enrollment) {
-            console.log('📥 Dispatching fetchEnrollmentForCourse');
-            console.log('   - courseId:', courseId);
-            console.log('   - userId:', userId);
+  // fetch enrollment if missing
+  useEffect(() => {
+    if (courseId && userId && !enrollment) {
+      dispatch(fetchEnrollmentForCourse({ userId, courseId }));
+    }
+  }, [dispatch, courseId, userId, enrollment]);
 
-            dispatch(fetchEnrollmentForCourse({ userId, courseId }));
-        } else {
-            console.log('⏭️ Skipping enrollment fetch:');
-            console.log('   - courseId:', courseId);
-            console.log('   - userId:', userId);
-            console.log('   - enrollment exists:', !!enrollment);
-        }
-    }, [dispatch, courseId, userId, enrollment]);
+  // reset dispatch flags on lesson/enrollment change
+  useEffect(() => {
+    didDispatchRef.current = false;
+    durationFetchRef.current = false;
+  }, [lessonId, enrollment?.id]);
 
-    // const completedKey = useMemo(() => {
-    //     const arr = Array.isArray(completedLessons) ? completedLessons.slice() : [];
-    //     arr.sort();
-    //     return arr.join("|");
-    // }, [completedLessons]);
+  // prefetch video duration (YT or generic)
+  useEffect(() => {
+    let mounted = true;
+    if (!lesson?.videoUrl || durationFetchRef.current) return;
+    durationFetchRef.current = true;
 
-    // reset didDispatchRef when lessonId or enrollment changes
-    useEffect(() => {
-        didDispatchRef.current = false;
-        // Also reset duration fetch for new lessons
-        durationFetchRef.current = false;
-    },
-        // [lessonId, enrollment?.id, completedKey]
-        [lessonId, enrollment?.id]
-    );
-
-    // prefetch video duration
-    useEffect(() => {
-        let mounted = true;
-        if (!lesson?.videoUrl || durationFetchRef.current) return;
-        durationFetchRef.current = true;
-
-        (async () => {
-            try {
-                if (convertYouTubeToEmbed(lesson.videoUrl)) {
-                    const mins = await fetchYouTubeDurationViaIframe(lesson.videoUrl);
-                    if (!mounted) return;
-                    if (typeof mins === "number") setVideoDuration(mins * 60);
-                    return;
-                }
-
-                const mins2 = await fetchVideoDurationInMinutes(lesson.videoUrl);
-                if (!mounted) return;
-                if (typeof mins2 === "number") setVideoDuration(mins2 * 60);
-            } catch (err) {
-                console.warn("Could not prefetch video duration:", err);
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
-    }, [lesson?.videoUrl]);
-    useEffect(() => {
-        if (!lesson) return;
-
-        // --- Native <video> handling (HTML5 video element) ---
-        if (!youtubeEmbed) {
-            const v = videoRef.current;
-            if (!v) return;
-
-            const onTimeUpdate = () => {
-                console.log('🎥 TimeUpdate Event Fired');
-                if (didDispatchRef.current) {
-                    console.log('⏭️ Already dispatched, skipping');
-                    return;
-                }
-
-                const nativeDuration =
-                    typeof v.duration === 'number' && isFinite(v.duration) && v.duration > 0
-                        ? v.duration
-                        : null;
-                const duration = nativeDuration || videoDuration || 0;
-
-                console.log('Video duration:', duration);
-                console.log('Current time:', v.currentTime);
-
-                if (duration <= 0) {
-                    console.log('⚠️ Duration is 0 or invalid, skipping');
-                    return;
-                }
-
-                const percent = (v.currentTime / duration) * 100;
-                console.log('Progress:', percent.toFixed(2) + '%');
-
-                if (percent >= 80 && !completedSet.has(lessonId)) {
-                    console.log('✅ 80% reached! Marking as complete...');
-
-                    if (enrollment?.id) {
-                        console.log('📤 Dispatching markLessonCompletedByEnrollment');
-                        dispatch(
-                            markLessonCompletedByEnrollment({
-                                enrollmentId: enrollment.id,
-                                lessonId,
-                            })
-                        );
-                        didDispatchRef.current = true;
-                        console.log('✅ Dispatch complete, didDispatchRef set to true');
-                    } else {
-                        // Show toast only once for admins
-                        if (user?.role === 'admin' && !adminToastShownRef.current) {
-                            toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
-                            adminToastShownRef.current = true;
-                            console.log('ℹ️ No enrollment found (admin preview mode)');
-                        } else {
-                            console.warn('⚠️ Cannot mark complete: no enrollment');
-                            console.log('enrollment object:', enrollment);
-                        }
-                    }
-                } else if (percent >= 80) {
-                    console.log('ℹ️ Already in completedSet, skipping dispatch');
-                }
-            };
-
-            v.addEventListener('timeupdate', onTimeUpdate);
-            v.addEventListener('ended', onTimeUpdate);
-            console.log('🎬 Event listeners attached to video element');
-
-            return () => {
-                v.removeEventListener('timeupdate', onTimeUpdate);
-                v.removeEventListener('ended', onTimeUpdate);
-                console.log('🧹 Event listeners removed from video element');
-            };
+    (async () => {
+      try {
+        if (convertYouTubeToEmbed(lesson.videoUrl)) {
+          const mins = await fetchYouTubeDurationViaIframe(lesson.videoUrl);
+          if (!mounted) return;
+          if (typeof mins === "number") setVideoDuration(mins * 60);
+          return;
         }
 
-        // --- YouTube embed handling (use API to create iframe inside a container div) ---
-        let mounted = true;
-        let progressInterval = null;
+        const mins2 = await fetchVideoDurationInMinutes(lesson.videoUrl);
+        if (!mounted) return;
+        if (typeof mins2 === "number") setVideoDuration(mins2 * 60);
+      } catch (err) {
+        console.warn("Could not prefetch video duration:", err);
+      }
+    })();
 
-        const initYouTubePlayer = async () => {
-            try {
-                await loadYouTubeIframeAPI(); // your existing loader that resolves when YT API ready
-                if (!mounted) return;
-
-                const container = playerContainerRef?.current;
-                if (!container) {
-                    console.error('❌ YT container not mounted');
-                    return;
-                }
-
-                // extract videoId from lesson.videoUrl or youtubeEmbed
-                const videoId =
-                    (typeof extractYouTubeId === 'function' && extractYouTubeId(lesson.videoUrl)) ||
-                    (youtubeEmbed && (() => {
-                        // youtubeEmbed might be like https://www.youtube.com/embed/<id>?...
-                        try {
-                            const m = youtubeEmbed.match(/\/embed\/([^?&/]+)/);
-                            return m ? m[1] : null;
-                        } catch (e) {
-                            return null;
-                        }
-                    })()) ||
-                    null;
-
-                if (!videoId) {
-                    console.error('❌ Could not extract videoId for YouTube player:', lesson?.videoUrl, youtubeEmbed);
-                    return;
-                }
-
-                // Destroy previous YT player if any
-                if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === 'function') {
-                    try {
-                        ytPlayerRef.current.destroy();
-                    } catch (e) {
-                        console.warn('Error destroying previous YT player:', e);
-                    }
-                    ytPlayerRef.current = null;
-                }
-
-                // Create player: pass the container element so the API creates the iframe
-                ytPlayerRef.current = new window.YT.Player(container, {
-                    height: '100%',
-                    width: '100%',
-                    videoId,
-                    playerVars: {
-                        rel: 0,
-                        enablejsapi: 1,
-                        origin: window.location.origin,
-                    },
-                    events: {
-                        onReady: () => {
-                            console.log('✅ YT player ready (API-created iframe)', { videoId });
-
-                            // Poll progress every 2 seconds (mirrors previous behavior)
-                            progressInterval = setInterval(() => {
-                                try {
-                                    if (!ytPlayerRef.current || didDispatchRef.current || !mounted) return;
-
-                                    const duration = ytPlayerRef.current.getDuration();
-                                    const currentTime = ytPlayerRef.current.getCurrentTime();
-
-                                    if (duration > 0 && typeof currentTime === 'number') {
-                                        const percent = (currentTime / duration) * 100;
-
-                                        // occasional log for debugging
-                                        if (Math.floor(currentTime) % 10 === 0) {
-                                            console.log('📊', Math.floor(currentTime), '/', Math.floor(duration), 's -', percent.toFixed(1) + '%');
-                                        }
-
-                                        if (percent >= 80 && !completedSet.has(lessonId)) {
-                                            if (enrollment?.id) {
-                                                console.log('🎉 80% REACHED! Marking complete (YT)...');
-                                                dispatch(
-                                                    markLessonCompletedByEnrollment({
-                                                        enrollmentId: enrollment.id,
-                                                        lessonId,
-                                                    })
-                                                );
-                                                didDispatchRef.current = true;
-
-                                                // stop interval after dispatch
-                                                if (progressInterval) {
-                                                    clearInterval(progressInterval);
-                                                    progressInterval = null;
-                                                }
-                                            } else {
-                                                if (user?.role === 'admin' && !adminToastShownRef.current) {
-                                                    toast.info('Progress not tracked in admin preview mode', { duration: 5000 });
-                                                    adminToastShownRef.current = true;
-                                                    console.log('ℹ️ No enrollment found (admin preview mode)');
-                                                } else {
-                                                    console.warn('⚠️ Cannot mark complete: no enrollment');
-                                                    console.log('enrollment object:', enrollment);
-                                                }
-                                            }
-                                        }
-                                    }
-                                } catch (e) {
-                                    // Ignore transient API timing errors
-                                }
-                            }, 2000);
-                        },
-
-                        onStateChange: (event) => {
-                            const states = {
-                                '-1': 'unstarted',
-                                '0': 'ended',
-                                '1': 'playing',
-                                '2': 'paused',
-                                '3': 'buffering',
-                                '5': 'cued',
-                            };
-                            console.log('🎬 Player state:', states[event.data] || event.data);
-                        },
-
-                        onError: (event) => {
-                            console.error('❌ YouTube player error:', event?.data ?? event);
-                        },
-                    },
-                });
-            } catch (err) {
-                console.error('❌ Failed to initialize YouTube player:', err);
-            }
-        };
-
-        initYouTubePlayer();
-
-        return () => {
-            mounted = false;
-            if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
-            }
-            if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === 'function') {
-                try {
-                    ytPlayerRef.current.destroy();
-                } catch (e) {
-                    console.warn('Error destroying YT player during cleanup:', e);
-                }
-                ytPlayerRef.current = null;
-            }
-        };
-        // NOTE: include stableEnrollmentId and others that affect dispatch logic
-    }, [
-        dispatch,
-        lessonId,
-        youtubeEmbed,
-        stableEnrollmentId,
-        videoDuration,
-        // completedSet is likely a Set from redux; include it so updates retrigger effect if it changes
-        completedSet,
-        enrollment?.id,
-        user?.role,
-        lesson,
-    ]);
-
-    // Refetch lesson when lessonId changes (for navigation)
-    useEffect(() => {
-        if (courseId && lessonId && !storeLesson) {
-            console.log('🔄 Lesson not in store, fetching course data');
-            dispatch(fetchCourseById(courseId));
-        }
-    }, [dispatch, courseId, lessonId, storeLesson]);
-
-    // Get all lessons for navigation
-    const allLessons = useMemo(() => {
-        return course?.lessons || [];
-    }, [course?.lessons]);
-
-    // Find current lesson index
-    const currentLessonIndex = useMemo(() => {
-        return allLessons.findIndex(l => l.id === lessonId);
-    }, [allLessons, lessonId]);
-
-    // Get previous and next lessons
-    const previousLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
-    const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
-
-    // Navigation handlers
-    const handlePreviousLesson = () => {
-        if (previousLesson) {
-            // Force a clean navigation with state
-            navigate(`/courses/${courseId}/lessons/${previousLesson.id}`, {
-                state: { lesson: previousLesson },
-                replace: false
-            });
-            // Force scroll to top
-            window.scrollTo(0, 0);
-        }
+    return () => {
+      mounted = false;
     };
+  }, [lesson?.videoUrl]);
 
-    const handleNextLesson = () => {
-        if (nextLesson) {
-            // Force a clean navigation with state
-            navigate(`/courses/${courseId}/lessons/${nextLesson.id}`, {
-                state: { lesson: nextLesson },
-                replace: false
-            });
-            // Force scroll to top
-            window.scrollTo(0, 0);
+  // Combined effect: native video listeners OR YouTube API player
+  useEffect(() => {
+    if (!lesson) return;
+
+    // NATIVE VIDEO: HTML5 <video> timeupdate/ended listener
+    if (!youtubeEmbed) {
+      const v = videoRef.current;
+      if (!v) return;
+
+      const onTimeUpdate = () => {
+        if (didDispatchRef.current) return;
+
+        const nativeDuration =
+          typeof v.duration === "number" && isFinite(v.duration) && v.duration > 0 ? v.duration : null;
+        const duration = nativeDuration || videoDuration || 0;
+        if (duration <= 0) return;
+
+        const percent = (v.currentTime / duration) * 100;
+        if (percent >= 80 && !completedSet.has(lessonId)) {
+          if (enrollment?.id) {
+            dispatch(
+              markLessonCompletedByEnrollment({
+                enrollmentId: enrollment.id,
+                lessonId,
+              })
+            );
+            didDispatchRef.current = true;
+          } else if (user?.role === "admin" && !adminToastShownRef.current) {
+            toast.info("Progress not tracked in admin preview mode", { duration: 5000 });
+            adminToastShownRef.current = true;
+          }
         }
-    };
+      };
 
-    if (!lesson || !course) {
-        return (
-            <div className={styles.page}>
-                <div className={styles.loading}>Loading lesson...</div>
-            </div>
-        );
+      v.addEventListener("timeupdate", onTimeUpdate);
+      v.addEventListener("ended", onTimeUpdate);
+
+      return () => {
+        v.removeEventListener("timeupdate", onTimeUpdate);
+        v.removeEventListener("ended", onTimeUpdate);
+      };
     }
 
-    // derive some lightweight metadata for display
-    const displayDuration =
-        typeof lesson.duration === "number" && lesson.duration > 0 ? `${lesson.duration} min` : null;
-    const isCompleted = completedSet.has(lessonId);
+    // YOUTUBE EMBED: Let YT API create iframe inside container
+    let mounted = true;
+    let progressInterval = null;
 
-    // Load notes from localStorage on mount or lesson change
-    useEffect(() => {
-        try {
-            const savedNotes = localStorage.getItem(notesKey);
-            if (savedNotes) {
-                setNotes(savedNotes);
-                console.log('📝 Loaded notes from localStorage');
-            } else {
-                setNotes("");
+    const initYouTubePlayer = async () => {
+      try {
+        await loadYouTubeIframeAPI();
+        if (!mounted) return;
+
+        const container = playerContainerRef?.current;
+        if (!container) {
+          console.error("YT container not mounted");
+          return;
+        }
+
+        // extract videoId
+        const videoId =
+          (typeof extractYouTubeId === "function" && extractYouTubeId(lesson.videoUrl)) ||
+          (youtubeEmbed && (() => {
+            try {
+              const m = youtubeEmbed.match(/\/embed\/([^?&/]+)/);
+              return m ? m[1] : null;
+            } catch (e) {
+              return null;
             }
-        } catch (error) {
-            console.error("Error loading notes:", error);
-            setNotes("");
-        }
-    }, [notesKey]);
+          })()) ||
+          null;
 
-    // Save notes to localStorage
-    const saveNotes = (noteText) => {
+        if (!videoId) {
+          console.error("Could not extract videoId for YouTube player:", lesson?.videoUrl, youtubeEmbed);
+          return;
+        }
+
+        // destroy previous player if present
+        if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
+          try {
+            ytPlayerRef.current.destroy();
+          } catch (e) {
+            console.warn("Error destroying previous YT player:", e);
+          }
+          ytPlayerRef.current = null;
+        }
+
+        // create new player (YT API will create the iframe)
+        ytPlayerRef.current = new window.YT.Player(container, {
+          height: "100%",
+          width: "100%",
+          videoId,
+          playerVars: {
+            rel: 0,
+            enablejsapi: 1,
+            origin: window.location.origin,
+          },
+          events: {
+            onReady: () => {
+              // start polling progress
+              progressInterval = setInterval(() => {
+                try {
+                  if (!ytPlayerRef.current || didDispatchRef.current || !mounted) return;
+
+                  const duration = ytPlayerRef.current.getDuration();
+                  const currentTime = ytPlayerRef.current.getCurrentTime();
+
+                  if (duration > 0 && typeof currentTime === "number") {
+                    const percent = (currentTime / duration) * 100;
+                    if (percent >= 80 && !completedSet.has(lessonId)) {
+                      if (enrollment?.id) {
+                        dispatch(
+                          markLessonCompletedByEnrollment({
+                            enrollmentId: enrollment.id,
+                            lessonId,
+                          })
+                        );
+                        didDispatchRef.current = true;
+
+                        if (progressInterval) {
+                          clearInterval(progressInterval);
+                          progressInterval = null;
+                        }
+                      } else if (user?.role === "admin" && !adminToastShownRef.current) {
+                        toast.info("Progress not tracked in admin preview mode", { duration: 5000 });
+                        adminToastShownRef.current = true;
+                      }
+                    }
+                  }
+                } catch (e) {
+                  // transient API errors are ignored
+                }
+              }, 2000);
+            },
+
+            onStateChange: (event) => {
+              // optional: state debug
+              // console.log("YT state:", event.data);
+            },
+
+            onError: (event) => {
+              console.error("YouTube player error:", event?.data ?? event);
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Failed to initialize YouTube player:", err);
+      }
+    };
+
+    if (youtubeEmbed) {
+      initYouTubePlayer();
+    }
+
+    return () => {
+      mounted = false;
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
         try {
-            localStorage.setItem(notesKey, noteText);
-            setLastSaved(new Date());
-            setIsSaving(false);
-            console.log('✅ Notes saved to localStorage');
-        } catch (error) {
-            console.error("Error saving notes:", error);
-            toast.error("Failed to save notes");
-            setIsSaving(false);
+          ytPlayerRef.current.destroy();
+        } catch (e) {
+          console.warn("Error destroying YT player during cleanup:", e);
         }
+        ytPlayerRef.current = null;
+      }
     };
+    // keep deps that affect dispatch / player creation
+  }, [
+    dispatch,
+    lessonId,
+    youtubeEmbed,
+    stableEnrollmentId,
+    videoDuration,
+    completedSet,
+    enrollment?.id,
+    user?.role,
+    lesson,
+    toast,
+  ]);
 
-    // Handle notes change with auto-save debounce
-    const handleNotesChange = (e) => {
-        const newNotes = e.target.value;
-        setNotes(newNotes);
-        setIsSaving(true);
+  // refetch lesson if not present when lessonId changes
+  useEffect(() => {
+    if (courseId && lessonId && !storeLesson) {
+      dispatch(fetchCourseById(courseId));
+    }
+  }, [dispatch, courseId, lessonId, storeLesson]);
 
-        // Clear previous timeout
-        if (notesTimeoutRef.current) {
-            clearTimeout(notesTimeoutRef.current);
-        }
+  // navigation helpers
+  const allLessons = useMemo(() => course?.lessons || [], [course?.lessons]);
+  const currentLessonIndex = useMemo(() => allLessons.findIndex((l) => l.id === lessonId), [
+    allLessons,
+    lessonId,
+  ]);
+  const previousLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
+  const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
 
-        // Auto-save after 1.5 seconds of no typing
-        notesTimeoutRef.current = setTimeout(() => {
-            saveNotes(newNotes);
-        }, 1500);
-    };
+  const handlePreviousLesson = () => {
+    if (previousLesson) {
+      navigate(`/courses/${courseId}/lessons/${previousLesson.id}`, {
+        state: { lesson: previousLesson },
+        replace: false,
+      });
+      window.scrollTo(0, 0);
+    }
+  };
 
-    // Manual save handler
-    const handleManualSave = () => {
-        // Clear any pending auto-save
-        if (notesTimeoutRef.current) {
-            clearTimeout(notesTimeoutRef.current);
-        }
-        setIsSaving(true);
-        saveNotes(notes);
-        toast.success("Notes saved successfully!");
-    };
+  const handleNextLesson = () => {
+    if (nextLesson) {
+      navigate(`/courses/${courseId}/lessons/${nextLesson.id}`, {
+        state: { lesson: nextLesson },
+        replace: false,
+      });
+      window.scrollTo(0, 0);
+    }
+  };
 
-    // Format time since last save
-    const formatTimeSince = (date) => {
-        const seconds = Math.floor((new Date() - date) / 1000);
-        if (seconds < 60) return "just now";
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}m ago`;
-        const hours = Math.floor(minutes / 60);
-        return `${hours}h ago`;
-    };
-
-    // Cleanup timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (notesTimeoutRef.current) {
-                clearTimeout(notesTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    // Debug logs
-    console.log('🎬 Render check:');
-    console.log('  youtubeEmbed:', youtubeEmbed);
-    console.log('  lesson.videoUrl:', lesson?.videoUrl);
-    console.log('  lessonId:', lessonId);
-
+  if (!lesson || !course) {
     return (
-        <div className={styles.page}>
-            {/* Toggle Lesson Panel Button */}
-            <button
-                className={styles.togglePanelBtn}
-                onClick={() => setShowSidebar(!showSidebar)}
-            >
-                {showSidebar ? '◄ Hide' : '☰ Lessons'}
-            </button>
+      <div className={styles.page}>
+        <div className={styles.loading}>Loading lesson...</div>
+      </div>
+    );
+  }
 
+  const displayDuration =
+    typeof lesson.duration === "number" && lesson.duration > 0 ? `${lesson.duration} min` : null;
+  const isCompleted = completedSet.has(lessonId);
+
+  // notes load
+  useEffect(() => {
+    try {
+      const savedNotes = localStorage.getItem(notesKey);
+      if (savedNotes) {
+        setNotes(savedNotes);
+      } else {
+        setNotes("");
+      }
+    } catch (error) {
+      console.error("Error loading notes:", error);
+      setNotes("");
+    }
+  }, [notesKey]);
+
+  // notes save helpers
+  const saveNotes = (noteText) => {
+    try {
+      localStorage.setItem(notesKey, noteText);
+      setLastSaved(new Date());
+      setIsSaving(false);
+    } catch (error) {
+      console.error("Error saving notes:", error);
+      toast.error("Failed to save notes");
+      setIsSaving(false);
+    }
+  };
+
+  const handleNotesChange = (e) => {
+    const newNotes = e.target.value;
+    setNotes(newNotes);
+    setIsSaving(true);
+
+    if (notesTimeoutRef.current) {
+      clearTimeout(notesTimeoutRef.current);
+    }
+
+    notesTimeoutRef.current = setTimeout(() => {
+      saveNotes(newNotes);
+    }, 1500);
+  };
+
+  const handleManualSave = () => {
+    if (notesTimeoutRef.current) {
+      clearTimeout(notesTimeoutRef.current);
+    }
+    setIsSaving(true);
+    saveNotes(notes);
+    toast.success("Notes saved successfully!");
+  };
+
+  useEffect(() => {
+    return () => {
+      if (notesTimeoutRef.current) clearTimeout(notesTimeoutRef.current);
+    };
+  }, []);
+
+  const formatTimeSince = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
+
+  // render
+  return (
+        <div className={styles.page}>
             {/* Lesson Navigation Panel (LEFT) */}
             <div className={`${styles.lessonPanel} ${!showSidebar ? styles.lessonPanelHidden : ''}`}>
                 <div className={styles.lessonPanelHeader}>
@@ -558,11 +455,20 @@ function LessonPlayer() {
                 </div>
             </div>
 
-            {/* Main Content */}
+            {/* Main Content (container includes the header where toggle lives) */}
             <div className={`${styles.container} ${showSidebar ? styles.containerWithPanel : styles.containerWithoutPanel}`}>
-                {/* LEFT: Player */}
                 <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
                     <header className={styles.header}>
+                        {/* Toggle Lesson Panel Button (moved into header to avoid overlapping navbar) */}
+                        <button
+                            className={styles.togglePanelBtn}
+                            onClick={() => setShowSidebar(!showSidebar)}
+                            aria-expanded={showSidebar}
+                            aria-label={showSidebar ? 'Hide lessons' : 'Show lessons'}
+                        >
+                            {showSidebar ? '◄ Hide' : '☰ Lessons'}
+                        </button>
+
                         <h1 id="lesson-title" className={styles.title}>
                             {lesson.title || "Untitled Lesson"}
                         </h1>
@@ -714,7 +620,7 @@ function LessonPlayer() {
                 </aside>
             </div>
         </div>
-    );
+  );
 }
 
 export default LessonPlayer;
