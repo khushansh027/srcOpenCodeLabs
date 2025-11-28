@@ -32,7 +32,7 @@ function LessonPlayer() {
     const completedLessons = enrollment?.completedLessons || [];
     const completedSet = useMemo(() => new Set(completedLessons), [completedLessons]);
     const stableEnrollmentId = enrollment?.id;
-    const lesson = locationLesson || storeLesson;
+    const lesson = storeLesson || locationLesson;
     const youtubeEmbed = convertYouTubeToEmbed(lesson?.videoUrl);
 
     // sidebar visibility state
@@ -371,7 +371,15 @@ function LessonPlayer() {
         youtubeEmbed,
         stableEnrollmentId
     ]);
-                
+    
+    // Refetch lesson when lessonId changes (for navigation)
+    useEffect(() => {
+        if (courseId && lessonId && !storeLesson) {
+            console.log('🔄 Lesson not in store, fetching course data');
+            dispatch(fetchCourseById(courseId));
+        }
+    }, [dispatch, courseId, lessonId, storeLesson]);
+
     // Get all lessons for navigation
     const allLessons = useMemo(() => {
         return course?.lessons || [];
