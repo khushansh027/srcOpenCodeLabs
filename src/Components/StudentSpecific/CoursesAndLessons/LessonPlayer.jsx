@@ -1,6 +1,6 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useParams, Navigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { userSelector } from "../../../ReduxToolKit/Slices/UserSlice.js";
 import { fetchCourseById, selectCourseById, selectLessonById } from "../../../ReduxToolKit/Slices/CourseAndLessons/CourseSlice.js";
 import { selectEnrollmentByCourseId, markLessonCompletedByEnrollment, fetchEnrollmentForCourse } from "../../../ReduxToolKit/Slices/EnrollmentSlice.js";
@@ -14,6 +14,7 @@ function LessonPlayer() {
     const { courseId, lessonId } = useParams();
     const location = useLocation();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     // get lesson from location state (if available) or from store
     const locationLesson = location?.state?.lesson || null;
@@ -36,6 +37,11 @@ function LessonPlayer() {
 
     // sidebar visibility state
     const [showSidebar, setShowSidebar] = useState(true);
+    // refs and state for video tracking
+    const videoRef = useRef(null);
+    const didDispatchRef = useRef(false);
+    const durationFetchRef = useRef(false);
+    const [videoDuration, setVideoDuration] = useState(null);
     // notes state
     const [notes, setNotes] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -82,12 +88,6 @@ function LessonPlayer() {
             console.log('   - enrollment exists:', !!enrollment);
         }
     }, [dispatch, courseId, userId, enrollment]);
-
-    // refs and state for video tracking
-    const videoRef = useRef(null);
-    const didDispatchRef = useRef(false);
-    const durationFetchRef = useRef(false);
-    const [videoDuration, setVideoDuration] = useState(null);
 
     // const completedKey = useMemo(() => {
     //     const arr = Array.isArray(completedLessons) ? completedLessons.slice() : [];
@@ -590,10 +590,10 @@ function LessonPlayer() {
                             onClick={handlePreviousLesson}
                             disabled={!previousLesson}
                         >
-                            ← Previous
+                            <span style={{ fontSize: '16px' }}>← Previous</span>
                             {previousLesson && (
-                                <span style={{ fontSize: '12px', opacity: 0.8 }}>
-                                    ({previousLesson.title?.slice(0, 20)}{previousLesson.title?.length > 20 ? '...' : ''})
+                                <span style={{ fontSize: '11px', opacity: 0.7, textAlign: 'center' }}>
+                                    {previousLesson.title?.slice(0, 30)}{previousLesson.title?.length > 30 ? '...' : ''}
                                 </span>
                             )}
                         </button>
@@ -603,12 +603,12 @@ function LessonPlayer() {
                             onClick={handleNextLesson}
                             disabled={!nextLesson}
                         >
+                            <span style={{ fontSize: '16px' }}>Next →</span>
                             {nextLesson && (
-                                <span style={{ fontSize: '12px', opacity: 0.8 }}>
-                                    ({nextLesson.title?.slice(0, 20)}{nextLesson.title?.length > 20 ? '...' : ''})
+                                <span style={{ fontSize: '11px', opacity: 0.7, textAlign: 'center' }}>
+                                    {nextLesson.title?.slice(0, 30)}{nextLesson.title?.length > 30 ? '...' : ''}
                                 </span>
                             )}
-                            Next →
                         </button>
                     </div>
 
