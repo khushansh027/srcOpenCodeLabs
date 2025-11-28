@@ -53,11 +53,11 @@
 
 /* Adjust main container when lesson panel is open */
 .containerWithPanel {
-    padding-left: 300px; /* 280px panel + 20px breathing room */
+    margin-left: 280px; /* make room for sidebar so main content doesn't overlap */
 }
 
 .containerWithoutPanel {
-    padding-left: 0;
+    margin-left: 20px; /* when collapsed, give small margin */
 }
 
 /* PLAYER COLUMN */
@@ -69,10 +69,12 @@
 
 /* header */
 .header {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* keep header above panel if necessary */
+  z-index: 10;
+  position: relative;
 }
 
 .title {
@@ -245,20 +247,21 @@
 
 /* Lesson Navigation Panel (LEFT side) */
 .lessonPanel {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    width: 280px;
-    background: #1f2937;
-    border-right: 1px solid #374151;
-    overflow-y: auto;
-    z-index: 200; /* Lower than navbar */
-    transition: transform 0.3s ease;
+  position: absolute;
+  top: calc(var(--navbar-height) + 8px);
+  left: 12px;
+  width: 260px;
+  max-height: calc(100vh - calc(var(--navbar-height) + 24px));
+  overflow: auto;
+  z-index: 50;
+  transition: transform 200ms ease, opacity 200ms ease;
 }
 
+/* hidden state: slide away */
 .lessonPanelHidden {
-    transform: translateX(-100%);
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .lessonPanelHeader {
@@ -473,3 +476,4 @@
     }
 
 }
+
