@@ -9,6 +9,7 @@
     --glass: rgba(255, 255, 255, 0.02);
     --card-elev: rgba(97, 95, 255, 0.12);
     --radius: 12px;
+    --navbar-height: 80.7227px;
 }
 
 /* Page container */
@@ -18,6 +19,8 @@
     padding: 28px 20px;
     min-height: 80vh;
     box-sizing: border-box;
+    padding-top: var(--navbar-height);
+    position: relative;
 }
 
 /* overall content grid: player left, sidebar right */
@@ -29,6 +32,23 @@
     gap: 32px;
     align-items: start;
     transition: none; /* Remove transition to prevent shift */
+}
+
+/* toggle button — inline inside header, keep look consistent */
+.togglePanelBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.togglePanelBtn:hover {
+  background: rgba(0,0,0,0.04);
 }
 
 /* Adjust main container when lesson panel is open */
@@ -233,7 +253,7 @@
     background: #1f2937;
     border-right: 1px solid #374151;
     overflow-y: auto;
-    z-index: 50; /* Lower than navbar */
+    z-index: 200; /* Lower than navbar */
     transition: transform 0.3s ease;
 }
 
@@ -451,4 +471,5 @@
     .navButton {
         transition: none !important;
     }
+
 }
