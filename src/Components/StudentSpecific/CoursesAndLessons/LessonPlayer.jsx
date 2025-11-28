@@ -34,6 +34,8 @@ function LessonPlayer() {
     const lesson = locationLesson || storeLesson;
     const youtubeEmbed = convertYouTubeToEmbed(lesson?.videoUrl);
 
+    // sidebar visibility state
+    const [showSidebar, setShowSidebar] = useState(true);
     // notes state
     const [notes, setNotes] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -103,6 +105,7 @@ function LessonPlayer() {
         [lessonId, enrollment?.id]
     );
 
+    // prefetch video duration
     useEffect(() => {
         let mounted = true;
         if (!lesson?.videoUrl || durationFetchRef.current) return;
@@ -368,7 +371,37 @@ function LessonPlayer() {
         youtubeEmbed,
         stableEnrollmentId
     ]);
+                
+    // Get all lessons for navigation
+    const allLessons = useMemo(() => {
+        return course?.lessons || [];
+    }, [course?.lessons]);
 
+    // Find current lesson index
+    const currentLessonIndex = useMemo(() => {
+        return allLessons.findIndex(l => l.id === lessonId);
+    }, [allLessons, lessonId]);
+
+    // Get previous and next lessons
+    const previousLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
+    const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
+
+    // Navigation handlers
+    const handlePreviousLesson = () => {
+        if (previousLesson) {
+            navigate(`/courses/${courseId}/lessons/${previousLesson.id}`, {
+                state: { lesson: previousLesson }
+            });
+        }
+    };
+
+    const handleNextLesson = () => {
+        if (nextLesson) {
+            navigate(`/courses/${courseId}/lessons/${nextLesson.id}`, {
+                state: { lesson: nextLesson }
+            });
+        }
+    };
 
     if (!lesson) return <p className={styles.loading}>Loading lesson...</p>;
 
@@ -461,10 +494,52 @@ function LessonPlayer() {
     console.log('  lessonId:', lessonId);
 
     return (
-
         <div className={styles.page}>
+            {/* Toggle Lesson Panel Button */}
+            <button 
+                className={styles.togglePanelBtn}
+                onClick={() => setShowSidebar(!showSidebar)}
+            >
+                {showSidebar ? '◄ Hide' : '☰ Lessons'}
+            </button>
 
-            <div className={styles.container}>
+            {/* Lesson Navigation Panel (LEFT) */}
+            <div className={`${styles.lessonPanel} ${!showSidebar ? styles.lessonPanelHidden : ''}`}>
+                <div className={styles.lessonPanelHeader}>
+                    <div className={styles.lessonPanelTitle}>{course?.title || "Course"}</div>
+                    <div className={styles.lessonPanelSubtitle}>
+                        {allLessons.length} lesson{allLessons.length !== 1 ? 's' : ''}
+                    </div>
+                </div>
+                
+                <div className={styles.lessonList}>
+                    {allLessons.map((l, index) => {
+                        const isActive = l.id === lessonId;
+                        const isCompleted = completedSet.has(l.id);
+                        
+                        return (
+                            <div
+                                key={l.id}
+                                className={`${styles.lessonItem} ${isActive ? styles.lessonItemActive : ''}`}
+                                onClick={() => {
+                                    if (l.id !== lessonId) {
+                                        navigate(`/courses/${courseId}/lessons/${l.id}`, {
+                                            state: { lesson: l }
+                                        });
+                                    }
+                                }}
+                            >
+                                <span className={styles.lessonNumber}>{index + 1}</span>
+                                <span className={styles.lessonTitle}>{l.title || "Untitled"}</span>
+                                {isCompleted && <span className={styles.lessonCompleted}>✓</span>}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className={`${styles.container} ${showSidebar ? styles.containerWithPanel : styles.containerWithoutPanel}`}>
                 {/* LEFT: Player */}
                 <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
                     <header className={styles.header}>
@@ -508,8 +583,36 @@ function LessonPlayer() {
                         )}
                     </section>
 
+                    {/* Navigation Buttons */}
+                    <div className={styles.navigationButtons}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePreviousLesson}
+                            disabled={!previousLesson}
+                        >
+                            ← Previous
+                            {previousLesson && (
+                                <span style={{ fontSize: '12px', opacity: 0.8 }}>
+                                    ({previousLesson.title?.slice(0, 20)}{previousLesson.title?.length > 20 ? '...' : ''})
+                                </span>
+                            )}
+                        </button>
+                        
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNextLesson}
+                            disabled={!nextLesson}
+                        >
+                            {nextLesson && (
+                                <span style={{ fontSize: '12px', opacity: 0.8 }}>
+                                    ({nextLesson.title?.slice(0, 20)}{nextLesson.title?.length > 20 ? '...' : ''})
+                                </span>
+                            )}
+                            Next →
+                        </button>
+                    </div>
+
                     <section className={styles.controlsRow} aria-hidden={true}>
-                        {/* subtle hint text — non-functional, purely presentational */}
                         <small className={styles.hint}>
                             Progress auto-saves — reach 80% to mark this lesson as completed.
                         </small>
@@ -583,7 +686,6 @@ function LessonPlayer() {
                     </div>
                 </aside>
             </div>
-
         </div>
     );
 }
