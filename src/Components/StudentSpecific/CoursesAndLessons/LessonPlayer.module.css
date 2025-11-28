@@ -10,7 +10,7 @@
 
   /* layout tuning */
   --container-width: 1100px; /* must match .container max-width */
-  --panel-width: 300px;
+  --panel-width: 260px;
   --panel-gap: 16px;         /* visible gap between panel and container */
   --navbar-height: 0px;      /* set if your site has a fixed navbar */
 }
@@ -33,6 +33,7 @@
 .container{
   position: relative;              /* positioning context for .lessonPanel */
   max-width: var(--container-width);
+  padding-left: calc(var(--panel-width) + var(--panel-gap) + 8px); /* creates space for the panel */
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -116,7 +117,8 @@
   position: absolute;
   /* place panel just left of the container (no brittle viewport math) */
   /* left: calc(-1 * (var(--panel-width) + var(--panel-gap))); */
-  left: 40px;
+  left: -1 * (var(--panel-width) + var(--panel-gap)); /* keep as before */
+  left: calc(-1 * (var(--panel-width) + var(--panel-gap)) + 5px);
   top: 12px; /* small offset so it doesn't collide with header gutters */
   width: var(--panel-width);
   max-height: calc(100vh - 40px);
@@ -328,6 +330,7 @@
 @media (prefers-reduced-motion: reduce){
   *{ transition: none !important; }
 }
+
 
 
 
