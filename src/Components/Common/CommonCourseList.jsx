@@ -119,7 +119,7 @@ export default function CommonCourseList() {
     }
 
     return (
-        <div className="max-w-8xl mx-auto px-20 py-15 bg-stone-950 min-h-screen">
+        <div className="max-w-8xl mx-auto px-20 py-8 bg-stone-950 min-h-screen">
             <h1 className={`${root.fontfamily} text-4xl font-bold mb-8 text-amber-50`}>Available Courses</h1>
             
             {
@@ -287,3 +287,4 @@ export default function CommonCourseList() {
         </div>
     );
 }
+
