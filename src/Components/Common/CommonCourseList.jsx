@@ -22,6 +22,9 @@ export default function CommonCourseList() {
     // Get user's enrollments to show "Enrolled" badge
     const enrollments = useSelector((state) => state.enrollments?.byId || {});
     
+    // CRITICAL DEBUG: Log the entire enrollments state
+    console.log('🔴 FULL ENROLLMENTS STATE:', useSelector((state) => state.enrollments));
+    
     // MEMOIZE the Set to prevent unnecessary rerenders
     const enrolledCourseIds = useMemo(() => {
         const enrolled = new Set();
@@ -74,8 +77,13 @@ export default function CommonCourseList() {
         console.log('🔍 User role:', userRole);
 
         try {
-            await dispatch(enrollInCourse({ userId, courseId })).unwrap();
+            const result = await dispatch(enrollInCourse({ userId, courseId })).unwrap();
+            console.log('✅ Enrollment result:', result);
             toast.success("Successfully enrolled in course!");
+            
+            // FORCE REFETCH enrollments after successful enrollment
+            await dispatch(fetchEnrolledCourses());
+            console.log('🔄 Refetched enrollments');
         } catch (err) {
             toast.error(`Enrollment failed: ${err.message || err}`);
         }
