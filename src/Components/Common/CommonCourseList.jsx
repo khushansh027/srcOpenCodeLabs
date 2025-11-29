@@ -34,9 +34,8 @@ export default function CommonCourseList() {
             const currentUserId = String(userId || '');
             
             if (eUserId === currentUserId && e?.courseId) {
-                // Add both string and number versions to handle any type
-                enrolled.add(String(e.courseId));
-                enrolled.add(Number(e.courseId));
+                // Only add the courseId as-is (keep original type)
+                enrolled.add(e.courseId);
             }
         });
         
@@ -146,8 +145,8 @@ export default function CommonCourseList() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {publishedCourses.map((course) => {
-                            // Check both string and number versions of course.id
-                            const isEnrolled = enrolledCourseIds.has(String(course.id)) || enrolledCourseIds.has(Number(course.id));
+                            // Direct comparison - keep types consistent
+                            const isEnrolled = enrolledCourseIds.has(course.id);
                             
                             // Debug log for each course - remove after fixing
                             console.log(`Course ${course.id} (${course.title}):`, {
