@@ -201,12 +201,23 @@
 }
 
 /* content area (lesson description) - MOVED TO LEFT COLUMN */
+/* Description header */
+.contentHeader {
+    font-weight: 700;
+    color: var(--primary-600);
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Update content section spacing */
 .content {
     background: rgba(255, 255, 255, 0.01);
     border-radius: 10px;
     padding: 14px;
     border: 1px solid rgba(255, 255, 255, 0.02);
-    margin-top: 12px;
+    margin-top: 0;
 }
 
 .prose {
@@ -386,3 +397,4 @@
         transition: none !important;
     }
 }
+
