@@ -21,19 +21,37 @@
 }
 
 /* overall content grid: player left, sidebar right */
-.container {
+/* .container {
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  /* left column (fixed-ish), center flexible, right sidebar */
   grid-template-columns: 300px 1fr 340px;
   gap: 24px;
+  align-items: start;
+  box-sizing: border-box;
+} */
+.container {
+  max-width: 1600px;       /* wider total width */
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  /* wider middle section by shrinking left & right columns */
+  grid-template-columns: 260px 1fr 300px;
+  gap: 28px;
   align-items: start;
   box-sizing: border-box;
 }
 
 /* left column styles (course card + description) */
+/* .leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: start;
+} */
+/* LEFT COLUMN — shift slightly more left */
 .leftColumn {
+  transform: translateX(-10px);   /* ⬅ move left 10px */
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -260,13 +278,24 @@
 }
 
 /* SIDEBAR (right) - COMPACT */
-.sidebar {
+/* .sidebar {
     display: flex;
     flex-direction: column;
     gap: 16px;
     position: sticky;
     top: 20px;
     align-self: start;
+} */
+
+/* RIGHT COLUMN — shift slightly more right */
+.sidebar {
+  transform: translateX(10px); 
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
 }
 
 /* small cards inside sidebar */
@@ -443,5 +472,6 @@
         transition: none !important;
     }
 }
+
 
 
