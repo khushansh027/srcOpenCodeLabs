@@ -356,6 +356,10 @@
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(97, 95, 255, 0.08);
 }
+.content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(97, 95, 255, 0.08);
+}
 
 /* Loading state */
 .loading {
@@ -472,6 +476,7 @@
         transition: none !important;
     }
 }
+
 
 
 
