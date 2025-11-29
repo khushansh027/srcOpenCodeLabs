@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -25,34 +24,29 @@ export default function CommonCourseList() {
     
     // MEMOIZE the Set to prevent unnecessary rerenders
     const enrolledCourseIds = useMemo(() => {
-        const results = new Set();
-        try {
-            const vals = Object.values(enrollments || {});
-            vals.forEach((e) => {
-                // normalize possible user id fields
-                const enrollmentUserId = e?.userId ?? e?.user ?? e?.studentId ?? e?.user_id ?? null;
-                // normalize possible course id fields (allow nested course object)
-                const enrollmentCourseId = e?.courseId ?? e?.course ?? e?.course_id ?? (e?.course && e.course.id) ?? null;
-    
-                if (!enrollmentUserId || !enrollmentCourseId) return;
-    
-                if (String(enrollmentUserId) === String(userId)) {
-                    results.add(String(enrollmentCourseId));
-                }
-            });
-    
-            // small debug log to inspect shapes — remove after verifying
-            console.log('🔎 enrolledCourseIds debug', {
-                userId,
-                enrollmentsSample: Object.values(enrollments || {}).slice(0,4),
-                enrolledCourseIdsArray: Array.from(results).slice(0,30)
-            });
-        } catch (err) {
-            console.warn('Error building enrolledCourseIds set', err);
-        }
-        return results;
+        const enrolled = new Set();
+        Object.values(enrollments).forEach(e => {
+            // Check multiple possible user ID formats
+            const eUserId = String(e?.userId || e?.user_id || e?.studentId || '');
+            const currentUserId = String(userId || '');
+            
+            if (eUserId === currentUserId && e?.courseId) {
+                // Add both string and number versions to handle any type
+                enrolled.add(String(e.courseId));
+                enrolled.add(Number(e.courseId));
+            }
+        });
+        
+        // Debug log - remove after fixing
+        console.log('🔍 Enrollment Check:', {
+            userId,
+            enrollmentsCount: Object.keys(enrollments).length,
+            enrolledCourseIds: Array.from(enrolled),
+            sampleEnrollment: Object.values(enrollments)[0]
+        });
+        
+        return enrolled;
     }, [enrollments, userId]);
-
 
 
     // Also fetch user's enrollments when component mounts
@@ -144,8 +138,16 @@ export default function CommonCourseList() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {publishedCourses.map((course) => {
-                            // const isEnrolled = enrolledCourseIds.has(course.id);
-                            const isEnrolled = enrolledCourseIds.has(String(course.id));
+                            // Check both string and number versions of course.id
+                            const isEnrolled = enrolledCourseIds.has(String(course.id)) || enrolledCourseIds.has(Number(course.id));
+                            
+                            // Debug log for each course - remove after fixing
+                            console.log(`Course ${course.id} (${course.title}):`, {
+                                courseId: course.id,
+                                courseIdType: typeof course.id,
+                                isEnrolled,
+                                enrolledCourseIds: Array.from(enrolledCourseIds)
+                            });
                             
                             return (
                                 <div
@@ -277,6 +279,4 @@ export default function CommonCourseList() {
             }
         </div>
     );
-
 }
-
