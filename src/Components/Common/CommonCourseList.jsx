@@ -20,10 +20,10 @@ export default function CommonCourseList() {
     const userRole = user?.role;
   
     // Get user's enrollments to show "Enrolled" badge
-    const enrollments = useSelector((state) => state.enrollments?.byId || {});
+    const enrollments = useSelector((state) => state.enrollment?.byId || {});
     
     // CRITICAL DEBUG: Log the entire enrollments state
-    console.log('🔴 FULL ENROLLMENTS STATE:', useSelector((state) => state.enrollments));
+    console.log('🔴 FULL ENROLLMENT STATE:', useSelector((state) => state.enrollment));
     
     // MEMOIZE the Set to prevent unnecessary rerenders
     const enrolledCourseIds = useMemo(() => {
