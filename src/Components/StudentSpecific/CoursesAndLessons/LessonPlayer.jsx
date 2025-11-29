@@ -500,159 +500,136 @@ function LessonPlayer() {
     console.log('  lesson.videoUrl:', lesson?.videoUrl);
     console.log('  lessonId:', lessonId);
 
-   return (
-        <div className={styles.page}>
+    return (
+          <div className={styles.page}>
             <div className={styles.container}>
-                {/* LEFT COLUMN: Video Player + Navigation */}
-                <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
-                    <header className={styles.header}>
-                        <h1 id="lesson-title" className={styles.title}>
-                            {lesson.title || "Untitled Lesson"}
-                        </h1>
-    
-                        <div className={styles.meta}>
-                            <div className={styles.metaLeft}>
-                                <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
-                                {displayDuration && <span className={styles.bullet}>•</span>}
-                                {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
-                            </div>
-    
-                            <div className={styles.metaRight}>
-                                {isCompleted ? (
-                                    <span className={styles.completed}>Completed ✅</span>
-                                ) : (
-                                    <span className={styles.notCompleted}>Not completed</span>
-                                )}
-                            </div>
-                        </div>
-                    </header>
-    
-                    <section className={styles.playerWrap} aria-label="Video player">
-                        {youtubeEmbed ? (
-                            <div className={styles.embed}>
-                                <div
-                                    id={`yt-player-container-${lessonId}`}
-                                    ref={playerContainerRef}
-                                    className={styles.iframeContainer}
-                                    title={lesson.title || "lesson-video-container"}
-                                />
-                            </div>
-                        ) : (
-                            <div className={styles.nativePlayer}>
-                                <video ref={videoRef} src={lesson.videoUrl} controls className={styles.video} />
-                            </div>
-                        )}
-                    </section>
-    
-                    {/* Navigation Buttons */}
-                    <div className={styles.navigationButtons}>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePreviousLesson}
-                            disabled={!previousLesson}
-                        >
-                            <span>← Previous</span>
-                            {previousLesson && (
-                                <span style={{ fontSize: '10px', opacity: 0.7 }}>
-                                    {previousLesson.title?.slice(0, 25)}{previousLesson.title?.length > 25 ? '...' : ''}
-                                </span>
-                            )}
-                        </button>
-    
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNextLesson}
-                            disabled={!nextLesson}
-                        >
-                            <span>Next →</span>
-                            {nextLesson && (
-                                <span style={{ fontSize: '10px', opacity: 0.7 }}>
-                                    {nextLesson.title?.slice(0, 25)}{nextLesson.title?.length > 25 ? '...' : ''}
-                                </span>
-                            )}
-                        </button>
+        
+              {/* LEFT COLUMN: Course card + Lesson description */}
+              <aside className={styles.leftColumn} aria-label="Course details">
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>Course</div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.courseTitle}>{course?.title || "Course"}</div>
+                    <div className={styles.smallMeta}>{course?.instructor || "Unknown"}</div>
+                  </div>
+                </div>
+        
+                <section className={styles.content} aria-label="Lesson description">
+                  <div className={styles.contentHeader}>Description</div>
+                  <div className={styles.prose} dangerouslySetInnerHTML={{ __html: lesson.desc || "" }} />
+                </section>
+              </aside>
+        
+              {/* CENTER COLUMN: Video player + title + prev/next */}
+              <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
+                <header className={styles.header}>
+                  <h1 id="lesson-title" className={styles.title}>
+                    {lesson.title || "Untitled Lesson"}
+                  </h1>
+        
+                  <div className={styles.meta}>
+                    <div className={styles.metaLeft}>
+                      <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
+                      {displayDuration && <span className={styles.bullet}>•</span>}
+                      {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
                     </div>
-    
-                    <section className={styles.controlsRow}>
-                        <small className={styles.hint}>
-                            Progress auto-saves — reach 80% to mark completed.
-                        </small>
-                    </section>
-    
-                    {/* MOVED: Course Card to LEFT COLUMN */}
-                    <div className={styles.card}>
-                        <div className={styles.cardHeader}>Course</div>
-                        <div className={styles.cardBody}>
-                            <div className={styles.courseTitle}>{course?.title || "Course"}</div>
-                            <div className={styles.smallMeta}>{course?.instructor || "Unknown"}</div>
-                        </div>
+        
+                    <div className={styles.metaRight}>
+                      {isCompleted ? (
+                        <span className={styles.completed}>Completed ✅</span>
+                      ) : (
+                        <span className={styles.notCompleted}>Not completed</span>
+                      )}
                     </div>
-    
-                    {/* MOVED: Lesson Description to LEFT COLUMN (below Course card) */}
-                    <section className={styles.content} aria-label="Lesson content">
-                        <div className={styles.contentHeader}>Description</div>
-                        <div className={styles.prose} dangerouslySetInnerHTML={{ __html: lesson.desc || "" }} />
-                    </section>
-                </main>
-    
-                {/* RIGHT COLUMN: Only Resources and Notes */}
-                <aside className={styles.sidebar} aria-label="Lesson resources and notes">
-                    <div className={styles.card}>
-                        <div className={styles.cardHeader}>Resources</div>
-                        <div className={styles.cardBody}>
-                            <p className={styles.smallMeta}>
-                                No resources attached.
-                            </p>
-                        </div>
+                  </div>
+                </header>
+        
+                <section className={styles.playerWrap} aria-label="Video player">
+                  {youtubeEmbed ? (
+                    <div className={styles.embed}>
+                      <div
+                        id={`yt-player-container-${lessonId}`}
+                        ref={playerContainerRef}
+                        className={styles.iframeContainer}
+                        title={lesson.title || "lesson-video-container"}
+                      />
                     </div>
-    
-                    <div className={styles.card}>
-                        <div className={styles.cardHeader}>Your Notes</div>
-                        <div className={styles.cardBody}>
-                            <textarea
-                                className={styles.notes}
-                                placeholder="Take quick notes about this lesson (local only)"
-                                value={notes}
-                                onChange={handleNotesChange}
-                            />
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginTop: '8px'
-                                }}
-                            >
-                                <small className={styles.smallMeta}>
-                                    {isSaving && "Saving..."}
-                                    {!isSaving && lastSaved && `Saved ${formatTimeSince(lastSaved)}`}
-                                    {!isSaving && !lastSaved && "Notes stored locally."}
-                                </small>
-    
-                                <button
-                                    onClick={handleManualSave}
-                                    disabled={isSaving}
-                                    style={{
-                                        padding: '6px 12px',
-                                        fontSize: '12px',
-                                        backgroundColor: '#4f46e5',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: isSaving ? 'not-allowed' : 'pointer',
-                                        opacity: isSaving ? 0.6 : 1,
-                                    }}
-                                >
-                                    {isSaving ? "Saving..." : "Save"}
-                                </button>
-                            </div>
-                        </div>
+                  ) : (
+                    <div className={styles.nativePlayer}>
+                      <video ref={videoRef} src={lesson.videoUrl} controls className={styles.video} />
                     </div>
-                </aside>
+                  )}
+                </section>
+        
+                {/* Prev / Next sit under the player in the center column */}
+                <div className={styles.navigationButtons}>
+                  <button className={styles.navButton} onClick={handlePreviousLesson} disabled={!previousLesson}>
+                    <span>← Previous</span>
+                    {previousLesson && (
+                      <span style={{ fontSize: '10px', opacity: 0.7 }}>
+                        {previousLesson.title?.slice(0, 25)}{previousLesson.title?.length > 25 ? '...' : ''}
+                      </span>
+                    )}
+                  </button>
+        
+                  <button className={styles.navButton} onClick={handleNextLesson} disabled={!nextLesson}>
+                    <span>Next →</span>
+                    {nextLesson && (
+                      <span style={{ fontSize: '10px', opacity: 0.7 }}>
+                        {nextLesson.title?.slice(0, 25)}{nextLesson.title?.length > 25 ? '...' : ''}
+                      </span>
+                    )}
+                  </button>
+                </div>
+        
+                <section className={styles.controlsRow}>
+                  <small className={styles.hint}>
+                    Progress auto-saves — reach 80% to mark completed.
+                  </small>
+                </section>
+              </main>
+        
+              {/* RIGHT COLUMN: Resources + Notes */}
+              <aside className={styles.sidebar} aria-label="Lesson resources and notes">
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>Resources</div>
+                  <div className={styles.cardBody}>
+                    <p className={styles.smallMeta}>No resources attached.</p>
+                  </div>
+                </div>
+        
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>Your Notes</div>
+                  <div className={styles.cardBody}>
+                    <textarea
+                      className={styles.notes}
+                      placeholder="Take quick notes about this lesson (local only)"
+                      value={notes}
+                      onChange={handleNotesChange}
+                    />
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop: '8px'}}>
+                      <small className={styles.smallMeta}>
+                        {isSaving && "Saving..."}
+                        {!isSaving && lastSaved && `Saved ${formatTimeSince(lastSaved)}`}
+                        {!isSaving && !lastSaved && "Notes stored locally."}
+                      </small>
+        
+                      <button onClick={handleManualSave} disabled={isSaving} style={{
+                        padding: '6px 12px', fontSize: '12px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px',
+                        cursor: isSaving ? 'not-allowed' : 'pointer', opacity: isSaving ? 0.6 : 1,
+                      }}>
+                        {isSaving ? "Saving..." : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+        
             </div>
-        </div>
+          </div>
     );
 }
 
 export default LessonPlayer;
+
 
