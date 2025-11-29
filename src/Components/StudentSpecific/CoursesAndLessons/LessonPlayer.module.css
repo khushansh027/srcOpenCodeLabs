@@ -207,3 +207,116 @@
     color: #d6dbe4;
     line-height: 1.7;
     font-size: 1rem;
+    word-wrap: break-word;
+}
+
+.prose p {
+    margin: 0 0 0.9rem 0;
+}
+
+.prose a {
+    color: var(--primary);
+}
+
+/* SIDEBAR (right) */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+    align-self: start;
+}
+
+/* small cards inside sidebar */
+.card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(0, 0, 0, 0.04));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 8px 18px rgba(6, 8, 20, 0.5);
+}
+
+.cardHeader {
+    padding: 14px 16px;
+    font-weight: 700;
+    color: var(--primary-600);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.cardBody {
+    padding: 16px;
+    color: var(--muted);
+}
+
+.courseTitle {
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.smallMeta {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* notes textarea */
+.notes {
+    width: 100%;
+    min-height: 90px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+    padding: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* small interactive touches */
+.playerWrap:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 56px var(--card-elev);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px rgba(97, 95, 255, 0.08);
+}
+
+/* Loading state */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 1.125rem;
+}
+
+/* Responsive: collapse to single column on small screens */
+@media (max-width: 920px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .sidebar {
+        position: static;
+        top: auto;
+    }
+
+    .playerWrap {
+        padding: 8px;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .playerWrap,
+    .card,
+    .container,
+    .page,
+    .navButton {
+        transition: none !important;
+    }
+}
