@@ -500,22 +500,23 @@ function LessonPlayer() {
     console.log('  lesson.videoUrl:', lesson?.videoUrl);
     console.log('  lessonId:', lessonId);
 
-    return (
+   return (
         <div className={styles.page}>
             <div className={styles.container}>
+                {/* LEFT COLUMN: Video Player + Navigation */}
                 <main className={styles.playerColumn} role="main" aria-labelledby="lesson-title">
                     <header className={styles.header}>
                         <h1 id="lesson-title" className={styles.title}>
                             {lesson.title || "Untitled Lesson"}
                         </h1>
-
+    
                         <div className={styles.meta}>
                             <div className={styles.metaLeft}>
                                 <span className={styles.instructor}>{course?.instructor || "Instructor"}</span>
                                 {displayDuration && <span className={styles.bullet}>•</span>}
                                 {displayDuration && <span className={styles.duration}>{displayDuration}</span>}
                             </div>
-
+    
                             <div className={styles.metaRight}>
                                 {isCompleted ? (
                                     <span className={styles.completed}>Completed ✅</span>
@@ -525,7 +526,7 @@ function LessonPlayer() {
                             </div>
                         </div>
                     </header>
-
+    
                     <section className={styles.playerWrap} aria-label="Video player">
                         {youtubeEmbed ? (
                             <div className={styles.embed}>
@@ -542,7 +543,7 @@ function LessonPlayer() {
                             </div>
                         )}
                     </section>
-
+    
                     {/* Navigation Buttons */}
                     <div className={styles.navigationButtons}>
                         <button
@@ -550,41 +551,35 @@ function LessonPlayer() {
                             onClick={handlePreviousLesson}
                             disabled={!previousLesson}
                         >
-                            <span style={{ fontSize: '16px' }}>← Previous</span>
+                            <span>← Previous</span>
                             {previousLesson && (
-                                <span style={{ fontSize: '11px', opacity: 0.7, textAlign: 'center' }}>
-                                    {previousLesson.title?.slice(0, 30)}{previousLesson.title?.length > 30 ? '...' : ''}
+                                <span style={{ fontSize: '10px', opacity: 0.7 }}>
+                                    {previousLesson.title?.slice(0, 25)}{previousLesson.title?.length > 25 ? '...' : ''}
                                 </span>
                             )}
                         </button>
-
+    
                         <button
                             className={styles.navButton}
                             onClick={handleNextLesson}
                             disabled={!nextLesson}
                         >
-                            <span style={{ fontSize: '16px' }}>Next →</span>
+                            <span>Next →</span>
                             {nextLesson && (
-                                <span style={{ fontSize: '11px', opacity: 0.7, textAlign: 'center' }}>
-                                    {nextLesson.title?.slice(0, 30)}{nextLesson.title?.length > 30 ? '...' : ''}
+                                <span style={{ fontSize: '10px', opacity: 0.7 }}>
+                                    {nextLesson.title?.slice(0, 25)}{nextLesson.title?.length > 25 ? '...' : ''}
                                 </span>
                             )}
                         </button>
                     </div>
-
-                    <section className={styles.controlsRow} aria-hidden={true}>
+    
+                    <section className={styles.controlsRow}>
                         <small className={styles.hint}>
-                            Progress auto-saves — reach 80% to mark this lesson as completed.
+                            Progress auto-saves — reach 80% to mark completed.
                         </small>
                     </section>
-
-                    <section className={styles.content} aria-label="Lesson content">
-                        <div className={styles.prose} dangerouslySetInnerHTML={{ __html: lesson.desc || "" }} />
-                    </section>
-                </main>
-
-                {/* RIGHT: Sidebar with course context, resources, and notes */}
-                <aside className={styles.sidebar} aria-label="Lesson details and notes">
+    
+                    {/* MOVED: Course Card to LEFT COLUMN */}
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>Course</div>
                         <div className={styles.cardBody}>
@@ -592,7 +587,16 @@ function LessonPlayer() {
                             <div className={styles.smallMeta}>{course?.instructor || "Unknown"}</div>
                         </div>
                     </div>
-
+    
+                    {/* MOVED: Lesson Description to LEFT COLUMN (below Course card) */}
+                    <section className={styles.content} aria-label="Lesson content">
+                        <div className={styles.contentHeader}>Description</div>
+                        <div className={styles.prose} dangerouslySetInnerHTML={{ __html: lesson.desc || "" }} />
+                    </section>
+                </main>
+    
+                {/* RIGHT COLUMN: Only Resources and Notes */}
+                <aside className={styles.sidebar} aria-label="Lesson resources and notes">
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>Resources</div>
                         <div className={styles.cardBody}>
@@ -601,7 +605,7 @@ function LessonPlayer() {
                             </p>
                         </div>
                     </div>
-
+    
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>Your Notes</div>
                         <div className={styles.cardBody}>
@@ -622,15 +626,15 @@ function LessonPlayer() {
                                 <small className={styles.smallMeta}>
                                     {isSaving && "Saving..."}
                                     {!isSaving && lastSaved && `Saved ${formatTimeSince(lastSaved)}`}
-                                    {!isSaving && !lastSaved && "Notes are stored locally in your browser."}
+                                    {!isSaving && !lastSaved && "Notes stored locally."}
                                 </small>
-
+    
                                 <button
                                     onClick={handleManualSave}
                                     disabled={isSaving}
                                     style={{
                                         padding: '6px 12px',
-                                        fontSize: '13px',
+                                        fontSize: '12px',
                                         backgroundColor: '#4f46e5',
                                         color: 'white',
                                         border: 'none',
@@ -651,3 +655,4 @@ function LessonPlayer() {
 }
 
 export default LessonPlayer;
+
