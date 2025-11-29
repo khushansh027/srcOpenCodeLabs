@@ -25,14 +25,34 @@ export default function CommonCourseList() {
     
     // MEMOIZE the Set to prevent unnecessary rerenders
     const enrolledCourseIds = useMemo(() => {
-        // normalize to strings and only include enrollments for the current user
-        return new Set(
-            Object.values(enrollments)
-                .filter(e => e.userId === userId)
-                // .map(e => e.courseId)
-                .map(e => String(e.courseId))
-        );
+        const results = new Set();
+        try {
+            const vals = Object.values(enrollments || {});
+            vals.forEach((e) => {
+                // normalize possible user id fields
+                const enrollmentUserId = e?.userId ?? e?.user ?? e?.studentId ?? e?.user_id ?? null;
+                // normalize possible course id fields (allow nested course object)
+                const enrollmentCourseId = e?.courseId ?? e?.course ?? e?.course_id ?? (e?.course && e.course.id) ?? null;
+    
+                if (!enrollmentUserId || !enrollmentCourseId) return;
+    
+                if (String(enrollmentUserId) === String(userId)) {
+                    results.add(String(enrollmentCourseId));
+                }
+            });
+    
+            // small debug log to inspect shapes — remove after verifying
+            console.log('🔎 enrolledCourseIds debug', {
+                userId,
+                enrollmentsSample: Object.values(enrollments || {}).slice(0,4),
+                enrolledCourseIdsArray: Array.from(results).slice(0,30)
+            });
+        } catch (err) {
+            console.warn('Error building enrolledCourseIds set', err);
+        }
+        return results;
     }, [enrollments, userId]);
+
 
 
     // Also fetch user's enrollments when component mounts
@@ -259,3 +279,4 @@ export default function CommonCourseList() {
     );
 
 }
+
