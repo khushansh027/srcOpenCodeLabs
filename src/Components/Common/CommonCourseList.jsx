@@ -25,10 +25,12 @@ export default function CommonCourseList() {
     
     // MEMOIZE the Set to prevent unnecessary rerenders
     const enrolledCourseIds = useMemo(() => {
+        // normalize to strings and only include enrollments for the current user
         return new Set(
             Object.values(enrollments)
                 .filter(e => e.userId === userId)
-                .map(e => e.courseId)
+                // .map(e => e.courseId)
+                .map(e => String(e.courseId))
         );
     }, [enrollments, userId]);
 
@@ -122,7 +124,8 @@ export default function CommonCourseList() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {publishedCourses.map((course) => {
-                            const isEnrolled = enrolledCourseIds.has(course.id);
+                            // const isEnrolled = enrolledCourseIds.has(course.id);
+                            const isEnrolled = enrolledCourseIds.has(String(course.id));
                             
                             return (
                                 <div
@@ -254,4 +257,5 @@ export default function CommonCourseList() {
             }
         </div>
     );
+
 }
