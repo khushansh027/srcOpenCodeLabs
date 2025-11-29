@@ -9,26 +9,29 @@
   --card-elev: rgba(97,95,255,0.12);
 
   /* layout tuning */
-  --container-width: 1100px;
+  --container-width: 1100px; /* must match .container max-width */
   --panel-width: 260px;
-  --panel-gap: 20px;
-  --navbar-height: 0px;
+  --panel-gap: 16px;         /* visible gap between panel and container */
+  --navbar-height: 0px;      /* set if your site has a fixed navbar */
 }
 
-/* Page wrapper */
+/* ---------------------------
+  Page wrapper & main grid
+   --------------------------- */
 .page{
   background: linear-gradient(45deg,#05060a 30%, #1e1e1e 80%);
   color: var(--text);
   padding: 28px 20px;
   min-height: 80vh;
   box-sizing: border-box;
+  padding-top: 28px; /* don't force large padding assuming fixed navbar */
   position: relative;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-/* Main container - FIXED: proper centering */
+/* Keep container centered and stable — toggling panel won't reflow content */
 .container{
-  position: relative;
+  position: relative;              /* positioning context for .lessonPanel */
   max-width: var(--container-width);
   margin: 0 auto;
   display: grid;
@@ -36,6 +39,7 @@
   gap: 32px;
   align-items: start;
   transition: none;
+  padding-left: 0;
 }
 
 /* PLAYER COLUMN */
@@ -43,23 +47,26 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding-left: 12px; /* small nudge to visually center player */
 }
 
-/* Header area */
+/* Header area (two-row layout) */
 .header{
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* top row: toggle, bottom: heading/meta */
   gap: 8px;
   z-index: 20;
   position: relative;
 }
 
+/* topRow holds the toggle button only */
 .topRow{
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/* headingBlock holds title + meta */
 .headingBlock{
   display: flex;
   flex-direction: row;
@@ -70,6 +77,7 @@
   flex-wrap: wrap;
 }
 
+/* title + meta styling */
 .title{
   font-size: 1.8rem;
   font-weight: 800;
@@ -100,18 +108,20 @@
 .completed{ color:#10b981; font-weight:600; }
 .notCompleted{ color:var(--muted); }
 
-/* LESSON PANEL - FIXED POSITIONING */
+/* ---------------------------
+  Lesson Panel (left)
+  Positioned relative to .container (so alignment is stable)
+   --------------------------- */
 .lessonPanel{
-  position: fixed;
-  left: 50%;
-  transform: translateX(calc(-50% - (var(--container-width) / 2) - var(--panel-width) - var(--panel-gap)));
-  top: 12px;
+  position: absolute;
+  /* place panel just left of the container (no brittle viewport math) */
+  left: calc(-1 * (var(--panel-width) + var(--panel-gap)));
+  top: 12px; /* small offset so it doesn't collide with header gutters */
   width: var(--panel-width);
   max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 60;
-  transition: opacity 220ms ease, visibility 220ms ease;
+  overflow: auto;
+  z-index: 60; /* below toggle which will be z=100 */
+  transition: transform 220ms ease, opacity 220ms ease;
   box-shadow: 0 12px 36px rgba(2,6,23,0.6);
   background: rgba(11,14,18,0.92);
   border-radius: 12px;
@@ -120,14 +130,14 @@
   box-sizing: border-box;
 }
 
-/* Hidden state - use opacity instead of transform */
+/* hidden state */
 .lessonPanelHidden{
+  transform: translateX(-110%);
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
 }
 
-/* Panel header */
+/* panel header */
 .lessonPanelHeader{
   padding: 18px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
@@ -136,25 +146,13 @@
   background: rgba(17,19,22,0.98);
   z-index: 10;
 }
+.lessonPanelTitle{ font-size:15px; font-weight:700; color:#f3f4f6; margin-bottom:6px; }
+.lessonPanelSubtitle{ font-size:13px; color:var(--muted); }
 
-.lessonPanelTitle{ 
-  font-size:15px; 
-  font-weight:700; 
-  color:#f3f4f6; 
-  margin-bottom:6px; 
-}
+/* lesson list */
+.lessonList{ padding: 12px 8px 18px 12px; box-sizing: border-box; }
 
-.lessonPanelSubtitle{ 
-  font-size:13px; 
-  color:var(--muted); 
-}
-
-/* Lesson list */
-.lessonList{ 
-  padding: 12px 8px 18px 12px; 
-  box-sizing: border-box; 
-}
-
+/* item: add left breathing so numbers don't clip */
 .lessonItem{
   padding: 12px 12px 12px 18px;
   margin-bottom: 8px;
@@ -167,17 +165,8 @@
   gap: 12px;
   background: transparent;
 }
-
-.lessonItem:hover{ 
-  background: rgba(255,255,255,0.02); 
-  border-color: rgba(79,70,229,0.12); 
-}
-
-.lessonItemActive{ 
-  background: var(--primary-600); 
-  border-color: rgba(99,102,241,0.16); 
-  color: #fff; 
-}
+.lessonItem:hover{ background: rgba(255,255,255,0.02); border-color: rgba(79,70,229,0.12); }
+.lessonItemActive{ background: var(--primary-600); border-color: rgba(99,102,241,0.16); color: #fff; }
 
 .lessonNumber{
   font-size: 14px;
@@ -187,7 +176,6 @@
   text-align: left;
   margin-left: 0;
 }
-
 .lessonItemActive .lessonNumber{ color: #eef2ff; }
 
 .lessonTitle{
@@ -195,14 +183,14 @@
   color: #f3f4f6;
   flex: 1;
   line-height: 1.3;
-  word-wrap: break-word;
 }
-
 .lessonItemActive .lessonTitle{ font-weight:600; color:#fff; }
 
 .lessonCompleted{ font-size:12px; color:#10b981; }
 
-/* Player wrap */
+/* ---------------------------
+  Player area & embed
+   --------------------------- */
 .playerWrap{
   background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));
   border-radius: 12px;
@@ -214,25 +202,20 @@
   margin-bottom: 8px;
 }
 
-.embed{ 
-  width:100%; 
-  aspect-ratio:16/9; 
-  border-radius:10px; 
-  overflow:hidden; 
-  background:black; 
-}
-
+.embed{ width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:black; }
 .iframe{ width:100%; height:100%; border:0; display:block; }
 .nativePlayer{ width:100%; border-radius:10px; overflow:hidden; background:black; }
 .video{ width:100%; height:auto; display:block; background:black; }
 
-/* Navigation buttons */
+/* Slight visual centering nudge */
+.playerWrap{ margin-left: 8px; }
+
+/* navigation buttons */
 .navigationButtons{
   display:flex;
   gap:16px;
   margin: 28px 0;
 }
-
 .navButton{
   flex:1;
   padding: 14px 20px;
@@ -247,29 +230,15 @@
   align-items:center;
   justify-content:center;
   gap:6px;
-  cursor: pointer;
-  transition: all 200ms ease;
 }
+.navButton:hover:not(:disabled){ background: var(--primary-600); color:#fff; transform: translateY(-3px); box-shadow:0 8px 30px rgba(79,70,229,0.16); }
+.navButton:disabled{ opacity:0.35; cursor:not-allowed; border-color: #6b7280; color:#6b7280; }
 
-.navButton:hover:not(:disabled){ 
-  background: var(--primary-600); 
-  color:#fff; 
-  transform: translateY(-3px); 
-  box-shadow:0 8px 30px rgba(79,70,229,0.16); 
-}
-
-.navButton:disabled{ 
-  opacity:0.35; 
-  cursor:not-allowed; 
-  border-color: #6b7280; 
-  color:#6b7280; 
-}
-
-/* Controls row */
+/* small hint */
 .controlsRow{ margin: 16px 0; }
 .hint{ color: var(--muted); font-size: 0.92rem; }
 
-/* Content area */
+/* content area */
 .content{
   background: rgba(255,255,255,0.01);
   border-radius: 10px;
@@ -277,18 +246,9 @@
   border: 1px solid rgba(255,255,255,0.02);
   margin-top: 24px;
 }
+.prose{ color:#d6dbe4; line-height:1.7; font-size:1rem; }
 
-.prose{ 
-  color:#d6dbe4; 
-  line-height:1.7; 
-  font-size:1rem; 
-  word-wrap: break-word;
-}
-
-.prose p { margin: 0 0 0.9rem 0; }
-.prose a { color: var(--primary); }
-
-/* Sidebar (right) */
+/* sidebar (right) */
 .sidebar{
   display:flex;
   flex-direction:column;
@@ -298,54 +258,16 @@
   align-self:start;
 }
 
-/* Cards */
-.card{ 
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04)); 
-  border-radius:12px; 
-  border:1px solid rgba(255,255,255,0.02); 
-  box-shadow:0 8px 18px rgba(6,8,20,0.5); 
-  overflow:hidden; 
-}
+/* cards */
+.card{ background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04)); border-radius:12px; border:1px solid rgba(255,255,255,0.02); box-shadow:0 8px 18px rgba(6,8,20,0.5); overflow:hidden; }
+.cardHeader{ padding:14px 16px; font-weight:700; color:var(--primary-600); border-bottom:1px solid rgba(255,255,255,0.02); }
+.cardBody{ padding:16px; color:var(--muted); }
+.notes{ width:100%; min-height:90px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.02); color:var(--text); padding:8px; box-sizing:border-box; }
 
-.cardHeader{ 
-  padding:14px 16px; 
-  font-weight:700; 
-  color:var(--primary-600); 
-  border-bottom:1px solid rgba(255,255,255,0.02); 
-}
-
-.cardBody{ 
-  padding:16px; 
-  color:var(--muted); 
-}
-
-.courseTitle{ 
-  font-weight: 800; 
-  color: #fff; 
-  margin-bottom: 6px; 
-}
-
-.smallMeta{ 
-  color: var(--muted); 
-  font-size: 0.9rem; 
-}
-
-.notes{ 
-  width:100%; 
-  min-height:90px; 
-  border-radius:8px; 
-  border:1px solid rgba(255,255,255,0.03); 
-  background: rgba(255,255,255,0.02); 
-  color:var(--text); 
-  padding:8px; 
-  box-sizing:border-box; 
-  resize: vertical;
-}
-
-/* Toggle button */
+/* toggle button - keep it visible and on top */
 .togglePanelBtn{
   position: relative;
-  z-index: 100;
+  z-index: 100; /* highest so it's always clickable */
   background: transparent;
   color: var(--text);
   border: none;
@@ -356,117 +278,52 @@
   align-items:center;
   gap:8px;
   font-weight:700;
-  transition: background 160ms ease;
 }
-
 .togglePanelBtn:hover{ background: rgba(255,255,255,0.02); }
 
-/* Loading state */
-.loading{
-  text-align: center;
-  padding: 40px;
-  color: var(--muted);
-  font-size: 1.125rem;
-}
+/* small adjustments */
+.lessonPanelHeader, .lessonList { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-/* Hover effects */
-.playerWrap:hover{ 
-  transform: translateY(-2px); 
-  box-shadow: 0 16px 40px var(--card-elev); 
-}
+/* ---------------------------
+  Responsive behavior
+   --------------------------- */
 
-.card:hover{ 
-  transform: translateY(-2px); 
-  box-shadow: 0 12px 32px rgba(97,95,255,0.08); 
-}
-
-/* RESPONSIVE */
-
-/* Tablet / Medium screens (1024px - 1280px) */
+/* Tablet / narrow laptop: pin panel to viewport left for better UX */
 @media (max-width: 1280px){
   .lessonPanel{
-    left: 20px;
-    transform: none;
-    width: 240px;
+    position: fixed;
+    left: 12px;
+    top: calc(var(--navbar-height) + 12px);
+    width: 260px;
+    max-height: calc(100vh - (var(--navbar-height) + 28px));
+    z-index: 70;
   }
-  
-  .container{
-    max-width: 960px;
-  }
+
+  /* ensure toggle sits above */
+  .togglePanelBtn{ z-index: 110; }
 }
 
-/* Small laptop (920px - 1024px) */
-@media (max-width: 1024px){
-  .container{
-    grid-template-columns: 1fr 280px;
-    max-width: 100%;
-    padding: 0 20px;
-  }
-  
-  .lessonPanel{
-    left: 16px;
-    width: 220px;
-  }
-}
-
-/* Tablet / Mobile (max 920px) */
+/* Mobile: keep panel as a drawer but below toggle and scrollable */
 @media (max-width: 920px){
-  .container{ 
-    grid-template-columns: 1fr; 
-    gap:20px; 
-    padding: 0 16px;
-  }
-  
+  .container{ grid-template-columns: 1fr; padding-left: 0; gap:20px; }
   .lessonPanel{
+    position: fixed;
     left: 12px;
-    top: 60px;
+    top: calc(var(--navbar-height) + 56px);
     width: 240px;
-    max-height: calc(100vh - 80px);
+    height: calc(100vh - (var(--navbar-height) + 72px));
+    overflow:auto;
     z-index: 80;
+    transform: translateX(0); /* visible by default only if not hidden */
   }
-  
-  .lessonPanelHidden{ 
-    opacity:0; 
-    visibility: hidden;
-    pointer-events:none; 
-  }
-  
-  .togglePanelBtn{ z-index: 120; }
-  
-  .sidebar{
-    position: static;
-  }
-  
-  .title{
-    font-size: 1.5rem;
-  }
+
+  .lessonPanelHidden{ transform: translateX(-120%); opacity:0; pointer-events:none; }
+  .togglePanelBtn{ z-index: 120; } /* highest priority so button stays clickable */
+  .playerWrap{ margin-left: 0; margin-right: 0; }
+  .headingBlock{ width:100%; }
 }
 
-/* Mobile small (max 640px) */
-@media (max-width: 640px){
-  .page{
-    padding: 20px 12px;
-  }
-  
-  .container{
-    padding: 0 12px;
-  }
-  
-  .lessonPanel{
-    width: calc(100vw - 24px);
-    left: 12px;
-  }
-  
-  .title{
-    font-size: 1.3rem;
-  }
-  
-  .navigationButtons{
-    flex-direction: column;
-  }
-}
-
-/* Reduced motion */
+/* reduced motion */
 @media (prefers-reduced-motion: reduce){
   *{ transition: none !important; }
 }
